@@ -572,7 +572,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h4 className="font-semibold text-blue-800">E-posta</h4>
-                    <a href="mailto:iletişim@derslikkurs.com" className="text-blue-700 hover:text-blue-800">iletişim@derslikkurs.com</a>
+                    <a href="mailto:iletisim@derslikkurs.com" className="text-blue-700 hover:text-blue-800">iletisim@derslikkurs.com</a>
                   </div>
                 </div>
                 

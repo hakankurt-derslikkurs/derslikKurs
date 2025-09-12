@@ -133,7 +133,7 @@ export default function Iletisim() {
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-800">E-posta</h4>
-                      <a href="mailto:iletişim@derslikkurs.com" className="text-gray-600 hover:text-blue-600">iletişim@derslikkurs.com</a>
+                      <a href="mailto:iletisim@derslikkurs.com" className="text-gray-600 hover:text-blue-600">iletisim@derslikkurs.com</a>
                     </div>
                   </div>
                   

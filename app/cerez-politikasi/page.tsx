@@ -158,14 +158,14 @@ export default function CerezPolitikasi() {
                       <div className="bg-white p-4 rounded-lg">
                         <p><strong>Adres:</strong> Caferağa Mahallesi, General Asım Gündüz Caddesi, Bahariye Plaza No: 62 Kat: 1-2, 34744 Kadıköy / İSTANBUL</p>
                         <p><strong>Telefon:</strong> +90 533 054 75 45</p>
-                        <p><strong>E-posta:</strong> <a href="mailto:iletişim@derslikkurs.com" className="text-blue-600 hover:text-blue-800">iletişim@derslikkurs.com</a></p>
+                        <p><strong>E-posta:</strong> <a href="mailto:iletisim@derslikkurs.com" className="text-blue-600 hover:text-blue-800">iletisim@derslikkurs.com</a></p>
                       </div>
                     </div>
 
                     <div className="bg-gray-50 p-6 rounded-lg">
                       <h3 className="text-xl font-semibold text-gray-800 mb-3">Güncelleme</h3>
                       <p className="text-gray-700">
-                        Bu çerez politikası, 26.08.2025 tarihinde yürürlüğe girmiştir. 
+                        Bu çerez politikası, 12.09.2025 tarihinde yürürlüğe girmiştir. 
                         Gerektiğinde güncellenebilir ve güncel metin web sitemizde yayınlanacaktır.
                       </p>
                     </div>
