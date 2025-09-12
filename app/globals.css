@@ -1,0 +1,304 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: white;
+  color: #1f2937;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Custom Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+       @keyframes fadeInRight {
+         from {
+           opacity: 0;
+           transform: translateX(30px);
+         }
+         to {
+           opacity: 1;
+           transform: translateX(0);
+         }
+       }
+
+       @keyframes fadeIn {
+         from {
+           opacity: 0;
+         }
+         to {
+           opacity: 1;
+         }
+       }
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.animate-fade-in-left {
+  animation: fadeInLeft 0.8s ease-out forwards;
+}
+
+       .animate-fade-in-right {
+         animation: fadeInRight 0.8s ease-out forwards;
+       }
+
+       .animate-fade-in {
+         animation: fadeIn 0.8s ease-out forwards;
+       }
+
+.animation-delay-200 {
+  animation-delay: 0.2s;
+}
+
+.animation-delay-400 {
+  animation-delay: 0.4s;
+}
+
+.animation-delay-600 {
+  animation-delay: 0.6s;
+}
+
+.animation-delay-1000 {
+  animation-delay: 1s;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom shadows */
+.shadow-3xl {
+  box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Date input improvements */
+input[type="date"] {
+  position: relative;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  background: transparent;
+  bottom: 0;
+  color: transparent;
+  cursor: pointer;
+  height: auto;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: auto;
+}
+
+/* Date input focus and hover states */
+input[type="date"]:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+input[type="date"]:hover {
+  border-color: #6b7280;
+}
+
+/* Date input text styling */
+input[type="date"]::-webkit-datetime-edit {
+  padding: 0;
+  color: #374151;
+  font-size: 16px;
+}
+
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+input[type="date"]::-webkit-datetime-edit-text {
+  padding: 0 2px;
+  color: #6b7280;
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  padding: 0 2px;
+  color: #374151;
+}
+
+/* Date input özel sınıfı */
+.date-input {
+  cursor: pointer;
+  background-color: white;
+}
+
+.date-input:hover {
+  background-color: #f9fafb;
+}
+
+.date-input:focus {
+  background-color: white;
+}
+
+/* Chrome için tarih input düzenlemeleri */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  input[type="date"] {
+    -webkit-appearance: auto;
+  }
+  
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
+  }
+}
+
+/* Mobile form improvements */
+@media (max-width: 768px) {
+  input[type="date"] {
+    min-height: 44px;
+    font-size: 16px;
+    padding: 12px 16px;
+  }
+  
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  select,
+  textarea {
+    min-height: 44px;
+    font-size: 16px;
+  }
+  
+  .grid.md\\:grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+  
+  /* İletişim sayfası mobil optimizasyonları */
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Harita yüksekliği mobilde daha küçük */
+  .h-80 {
+    height: 250px;
+  }
+  
+  /* İletişim kartları arası boşluk */
+  .space-y-6 > * + * {
+    margin-top: 1.5rem;
+  }
+  
+  /* Form padding mobilde daha az */
+  .p-6 {
+    padding: 1rem;
+  }
+  
+  /* Hero section padding mobilde daha az */
+  .py-20 {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+  
+  /* Çerez banner mobil optimizasyonları */
+  .fixed.bottom-0 {
+    padding: 1rem;
+  }
+  
+  .fixed.bottom-0 .container {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  
+  /* Çerez banner butonları mobilde daha büyük */
+  .fixed.bottom-0 button {
+    min-height: 44px;
+    font-size: 14px;
+  }
+  
+  /* Çerez detayları mobilde daha kompakt */
+  .fixed.bottom-0 .bg-gray-800 {
+    margin-left: 0;
+    padding: 0.75rem;
+  }
+  
+  .fixed.bottom-0 .ml-8 {
+    margin-left: 0;
+  }
+  
+  /* Çerez banner metin boyutu mobilde optimize */
+  .fixed.bottom-0 .text-sm {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  
+  .fixed.bottom-0 .text-xs {
+    font-size: 12px;
+  }
+  
+  /* Mobilde tarih input takvimi daha büyük */
+  input[type="date"] {
+    font-size: 16px;
+    padding: 12px 16px;
+    min-height: 44px;
+  }
+  
+  input[type="date"]::-webkit-datetime-edit {
+    font-size: 16px;
+  }
+  
+  /* Mobilde takvim popup'ı daha büyük */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    width: 24px;
+    height: 24px;
+  }
+  
+  /* Mobil Chrome için tarih input düzenlemeleri */
+  @media screen and (-webkit-min-device-pixel-ratio: 0) {
+    input[type="date"] {
+      -webkit-appearance: auto;
+    }
+  }
+}
