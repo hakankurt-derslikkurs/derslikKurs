@@ -28,6 +28,14 @@ DROP TRIGGER IF EXISTS trigger_tanisma_dersi_insert ON tanisma_dersi_basvuru;
 DROP TRIGGER IF EXISTS trigger_tanisma_dersi_update ON tanisma_dersi_basvuru;
 DROP TRIGGER IF EXISTS trigger_tanisma_dersi_delete ON tanisma_dersi_basvuru;
 
+-- Tablo değişiklik bildirim trigger'ları
+DROP TRIGGER IF EXISTS bursluluk_basvuru_insert_trigger ON bursluluk_basvuru;
+DROP TRIGGER IF EXISTS bursluluk_basvuru_update_trigger ON bursluluk_basvuru;
+DROP TRIGGER IF EXISTS bursluluk_basvuru_delete_trigger ON bursluluk_basvuru;
+DROP TRIGGER IF EXISTS tanisma_dersi_basvuru_insert_trigger ON tanisma_dersi_basvuru;
+DROP TRIGGER IF EXISTS tanisma_dersi_basvuru_update_trigger ON tanisma_dersi_basvuru;
+DROP TRIGGER IF EXISTS tanisma_dersi_basvuru_delete_trigger ON tanisma_dersi_basvuru;
+
 -- =====================================================
 -- 3. FONKSİYONLARI SİL
 -- =====================================================
@@ -65,6 +73,15 @@ DROP FUNCTION IF EXISTS trigger_log_tanisma_dersi_delete() CASCADE;
 
 -- Test fonksiyonu
 DROP FUNCTION IF EXISTS comprehensive_system_test() CASCADE;
+
+-- Tablo değişiklik bildirim fonksiyonları
+DROP FUNCTION IF EXISTS notify_table_change(TEXT, TEXT, JSONB, JSONB) CASCADE;
+DROP FUNCTION IF EXISTS trigger_bursluluk_basvuru_insert() CASCADE;
+DROP FUNCTION IF EXISTS trigger_bursluluk_basvuru_update() CASCADE;
+DROP FUNCTION IF EXISTS trigger_bursluluk_basvuru_delete() CASCADE;
+DROP FUNCTION IF EXISTS trigger_tanisma_dersi_basvuru_insert() CASCADE;
+DROP FUNCTION IF EXISTS trigger_tanisma_dersi_basvuru_update() CASCADE;
+DROP FUNCTION IF EXISTS trigger_tanisma_dersi_basvuru_delete() CASCADE;
 
 -- =====================================================
 -- 4. TABLOLARI SİL

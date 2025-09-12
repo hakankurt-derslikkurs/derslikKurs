@@ -1201,7 +1201,232 @@ SELECT
     NOW() as guncelleme_tarihi;
 
 -- =====================================================
--- 17. SİSTEM ÖZETİ
+-- 17. TABLO DEĞİŞİKLİK BİLDİRİM SİSTEMİ
+-- =====================================================
+
+-- =====================================================
+-- 17.1. HTTP REQUEST HELPER FUNCTION
+-- =====================================================
+-- Edge function'u çağırmak için HTTP request gönderen fonksiyon
+CREATE OR REPLACE FUNCTION notify_table_change(
+  table_name TEXT,
+  operation TEXT,
+  record_data JSONB,
+  old_record JSONB DEFAULT NULL
+)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  request_payload JSONB;
+  response_status INTEGER;
+  response_content TEXT;
+  supabase_url TEXT;
+  service_key TEXT;
+BEGIN
+  -- Hardcoded değerler
+  supabase_url := 'https://zwyjgxqqjhgbijeyiads.supabase.co';
+  service_key := 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp3eWpneHFxamhnYmlqZXlpYWRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc2OTEwNTUsImV4cCI6MjA3MzI2NzA1NX0.3PUR_FrwilTTVS3acKNUnH24ouS_nVCE-xW86AChoMk';
+  
+  -- Request payload oluştur
+  request_payload := jsonb_build_object(
+    'table_name', table_name,
+    'operation', operation,
+    'record_data', record_data,
+    'old_record', old_record
+  );
+
+  -- HTTP request gönder
+  IF supabase_url IS NOT NULL AND service_key IS NOT NULL THEN
+    SELECT status, content INTO response_status, response_content
+    FROM http((
+      'POST',
+      supabase_url || '/functions/v1/table-change-notification',
+      ARRAY[
+        http_header('Content-Type', 'application/json'),
+        http_header('Authorization', 'Bearer ' || service_key)
+      ],
+      'application/json',
+      request_payload::text
+    ));
+    
+    -- Hata kontrolü
+    IF response_status != 200 THEN
+      RAISE WARNING 'Table change notification failed: % - %', response_status, response_content;
+    END IF;
+  ELSE
+    RAISE WARNING 'Supabase URL veya Service Key ayarlanmamış!';
+  END IF;
+
+EXCEPTION
+  WHEN OTHERS THEN
+    RAISE WARNING 'Table change notification error: %', SQLERRM;
+END;
+$$;
+
+-- =====================================================
+-- 17.2. BURSLULUK BASVURU TRIGGER FUNCTIONS
+-- =====================================================
+
+-- INSERT trigger function
+CREATE OR REPLACE FUNCTION trigger_bursluluk_basvuru_insert()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  -- Yeni kayıt için bildirim gönder
+  PERFORM notify_table_change(
+    'bursluluk_basvuru',
+    'INSERT',
+    to_jsonb(NEW)
+  );
+  
+  RETURN NEW;
+END;
+$$;
+
+-- UPDATE trigger function
+CREATE OR REPLACE FUNCTION trigger_bursluluk_basvuru_update()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  -- Güncelleme için bildirim gönder
+  PERFORM notify_table_change(
+    'bursluluk_basvuru',
+    'UPDATE',
+    to_jsonb(NEW),
+    to_jsonb(OLD)
+  );
+  
+  RETURN NEW;
+END;
+$$;
+
+-- DELETE trigger function
+CREATE OR REPLACE FUNCTION trigger_bursluluk_basvuru_delete()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  -- Silme için bildirim gönder
+  PERFORM notify_table_change(
+    'bursluluk_basvuru',
+    'DELETE',
+    to_jsonb(OLD)
+  );
+  
+  RETURN OLD;
+END;
+$$;
+
+-- =====================================================
+-- 17.3. TANISMA DERsI BASVURU TRIGGER FUNCTIONS
+-- =====================================================
+
+-- INSERT trigger function
+CREATE OR REPLACE FUNCTION trigger_tanisma_dersi_basvuru_insert()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  -- Yeni kayıt için bildirim gönder
+  PERFORM notify_table_change(
+    'tanisma_dersi_basvuru',
+    'INSERT',
+    to_jsonb(NEW)
+  );
+  
+  RETURN NEW;
+END;
+$$;
+
+-- UPDATE trigger function
+CREATE OR REPLACE FUNCTION trigger_tanisma_dersi_basvuru_update()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  -- Güncelleme için bildirim gönder
+  PERFORM notify_table_change(
+    'tanisma_dersi_basvuru',
+    'UPDATE',
+    to_jsonb(NEW),
+    to_jsonb(OLD)
+  );
+  
+  RETURN NEW;
+END;
+$$;
+
+-- DELETE trigger function
+CREATE OR REPLACE FUNCTION trigger_tanisma_dersi_basvuru_delete()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  -- Silme için bildirim gönder
+  PERFORM notify_table_change(
+    'tanisma_dersi_basvuru',
+    'DELETE',
+    to_jsonb(OLD)
+  );
+  
+  RETURN OLD;
+END;
+$$;
+
+-- =====================================================
+-- 17.4. TRIGGER'LARI OLUŞTUR
+-- =====================================================
+
+-- Bursluluk başvuru trigger'ları
+DROP TRIGGER IF EXISTS bursluluk_basvuru_insert_trigger ON bursluluk_basvuru;
+CREATE TRIGGER bursluluk_basvuru_insert_trigger
+  AFTER INSERT ON bursluluk_basvuru
+  FOR EACH ROW
+  EXECUTE FUNCTION trigger_bursluluk_basvuru_insert();
+
+DROP TRIGGER IF EXISTS bursluluk_basvuru_update_trigger ON bursluluk_basvuru;
+CREATE TRIGGER bursluluk_basvuru_update_trigger
+  AFTER UPDATE ON bursluluk_basvuru
+  FOR EACH ROW
+  EXECUTE FUNCTION trigger_bursluluk_basvuru_update();
+
+DROP TRIGGER IF EXISTS bursluluk_basvuru_delete_trigger ON bursluluk_basvuru;
+CREATE TRIGGER bursluluk_basvuru_delete_trigger
+  AFTER DELETE ON bursluluk_basvuru
+  FOR EACH ROW
+  EXECUTE FUNCTION trigger_bursluluk_basvuru_delete();
+
+-- Tanışma dersi başvuru trigger'ları
+DROP TRIGGER IF EXISTS tanisma_dersi_basvuru_insert_trigger ON tanisma_dersi_basvuru;
+CREATE TRIGGER tanisma_dersi_basvuru_insert_trigger
+  AFTER INSERT ON tanisma_dersi_basvuru
+  FOR EACH ROW
+  EXECUTE FUNCTION trigger_tanisma_dersi_basvuru_insert();
+
+DROP TRIGGER IF EXISTS tanisma_dersi_basvuru_update_trigger ON tanisma_dersi_basvuru;
+CREATE TRIGGER tanisma_dersi_basvuru_update_trigger
+  AFTER UPDATE ON tanisma_dersi_basvuru
+  FOR EACH ROW
+  EXECUTE FUNCTION trigger_tanisma_dersi_basvuru_update();
+
+DROP TRIGGER IF EXISTS tanisma_dersi_basvuru_delete_trigger ON tanisma_dersi_basvuru;
+CREATE TRIGGER tanisma_dersi_basvuru_delete_trigger
+  AFTER DELETE ON tanisma_dersi_basvuru
+  FOR EACH ROW
+  EXECUTE FUNCTION trigger_tanisma_dersi_basvuru_delete();
+
+-- =====================================================
+-- 18. SİSTEM ÖZETİ
 -- =====================================================
 -- Tüm sistemin özeti
 SELECT 
@@ -1210,6 +1435,7 @@ SELECT
     'Log Tabloları: 1 (form_submission_log)' as log_tablolari,
     'Rate Limiting Tabloları: 2 (rate_limits, rate_limit_log)' as rate_limiting_tablolari,
     'KVKK Yönetim Tabloları: 2 (data_cleanup_log, data_retention_policies)' as kvkk_tablolari,
+    'Tablo Değişiklik Bildirim Triggerları: 6 adet' as trigger_sayisi,
     'Toplam Tablo: 9' as toplam_tablo,
     'Cron Joblar: 6 adet' as cron_joblar,
-    'Fonksiyonlar: 10 adet' as fonksiyonlar;
+    'Fonksiyonlar: 16 adet' as fonksiyonlar;
