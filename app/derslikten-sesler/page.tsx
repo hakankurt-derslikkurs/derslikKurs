@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import ScrollAnimation from '../components/ScrollAnimation'
 import { useMedya } from '../hooks/useMedya'
@@ -10,16 +10,41 @@ import ImageModal from '../components/ImageModal'
 
 
 export default function DersliktenSesler() {
-  const carouselRef = useRef<HTMLDivElement>(null)
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0)
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true)
   const [selectedVideo, setSelectedVideo] = useState<{url: string, name: string} | null>(null)
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false)
   const [selectedImage, setSelectedImage] = useState<{url: string, name: string} | null>(null)
   const [isImageModalOpen, setIsImageModalOpen] = useState(false)
   const { images, videos, loading: loadingMedya } = useMedya()
   const { ogrenciSesleri, loading: loadingOgrenciSesleri, error: ogrenciSesleriError } = useOgrenciSesleri()
-
-
+  
+  // Tüm medyaları birleştir
+  const allMedia = [...images, ...videos]
+  
+  // Slayt fonksiyonları
+  const nextSlide = () => {
+    setCurrentMediaIndex((prev) => (prev + 1) % allMedia.length)
+  }
+  
+  const prevSlide = () => {
+    setCurrentMediaIndex((prev) => (prev - 1 + allMedia.length) % allMedia.length)
+  }
+  
+  const goToSlide = (index: number) => {
+    setCurrentMediaIndex(index)
+  }
+  
+  // Otomatik slayt geçişi
+  useEffect(() => {
+    if (!isAutoPlaying || allMedia.length <= 1) return
+    
+    const interval = setInterval(() => {
+      nextSlide()
+    }, 10000) // 10 saniyede bir geçiş
+    
+    return () => clearInterval(interval)
+  }, [isAutoPlaying, allMedia.length])
 
   // Video modal'ı aç
   const openVideoModal = (video: {url: string, name: string}) => {
@@ -45,22 +70,6 @@ export default function DersliktenSesler() {
     setSelectedImage(null)
   }
 
-  const scrollToNext = () => {
-    if (carouselRef.current) {
-      const scrollAmount = 280 // w-64 + space-x-6 = 256 + 24 = 280
-      carouselRef.current.scrollLeft += scrollAmount
-      const totalItems = images.length + videos.length
-      setCurrentIndex(prev => Math.min(prev + 1, totalItems - 1))
-    }
-  }
-
-  const scrollToPrev = () => {
-    if (carouselRef.current) {
-      const scrollAmount = 280 // w-64 + space-x-6 = 256 + 24 = 280
-      carouselRef.current.scrollLeft -= scrollAmount
-      setCurrentIndex(prev => Math.max(prev - 1, 0))
-    }
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -80,127 +89,141 @@ export default function DersliktenSesler() {
         </div>
       </section>
 
-      {/* Slayt Gösterisi */}
+      {/* Büyük Medya Slaytı */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
-
-          
-          <div className="relative">
-            {/* Sol Ok */}
-            <button 
-              onClick={scrollToPrev}
-              className="absolute left-0 top-1/2 transform -translate-y-1/2 z-10 bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
-            >
-              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            
-            {/* Sağ Ok */}
-            <button 
-              onClick={scrollToNext}
-              className="absolute right-0 top-1/2 transform -translate-y-1/2 z-10 bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
-            >
-              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-            
-            {/* Slayt İçeriği */}
-            <div 
-              ref={carouselRef}
-              className="flex space-x-6 overflow-x-auto scrollbar-hide px-12 scroll-smooth"
-            >
-              {/* Fotoğraflar */}
-              {loadingMedya ? (
-                <div className="flex items-center justify-center w-full py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <span className="ml-3 text-blue-700">Fotoğraflar yükleniyor...</span>
-                </div>
-              ) : images.length > 0 && (
-                images.map((image, index) => (
-                  <ScrollAnimation key={index} animation="zoomIn" delay={400 + index * 100}>
-                    <div 
-                      className="group cursor-pointer flex-shrink-0"
-                      onClick={() => openImageModal(image)}
-                    >
-                      <div className="relative overflow-hidden rounded-xl shadow-lg w-64">
-                        <img
-                          src={image.url}
-                          alt={image.name}
-                          className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
-                        />
-                      </div>
-                    </div>
-                  </ScrollAnimation>
-                ))
-              )}
-              
-              {/* Videolar */}
-              {loadingMedya ? (
-                <div className="flex items-center justify-center w-full py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <span className="ml-3 text-blue-700">Videolar yükleniyor...</span>
-                </div>
-              ) : videos.length > 0 && (
-                videos.map((video, index) => (
-                  <ScrollAnimation key={index} animation="zoomIn" delay={400 + index * 100}>
-                    <div 
-                      className="group cursor-pointer flex-shrink-0"
-                      onClick={() => openVideoModal(video)}
-                      onTouchEnd={(e) => {
-                        e.preventDefault()
-                        openVideoModal(video)
-                      }}
-                      style={{
-                        touchAction: 'manipulation',
-                        WebkitTouchCallout: 'none',
-                        WebkitUserSelect: 'none'
-                      }}
-                    >
-                      <div className="relative overflow-hidden rounded-xl shadow-lg w-64">
-                        {/* Video Thumbnail */}
-                        <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+          {loadingMedya ? (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <p className="mt-4 text-blue-700">Medya dosyaları yükleniyor...</p>
+            </div>
+          ) : (
+            <>
+              {/* Büyük Medya Slaytı */}
+              {allMedia.length > 0 && (
+                <div className="max-w-6xl mx-auto">
+                  <div className="relative bg-white rounded-2xl shadow-2xl overflow-hidden">
+                    {/* Ana Medya Gösterimi */}
+                    <div className="relative h-[600px] lg:h-[700px] bg-black">
+                      {allMedia[currentMediaIndex].type === 'video' ? (
+                        <div 
+                          className="group relative w-full h-full cursor-pointer"
+                          onClick={() => openVideoModal(allMedia[currentMediaIndex])}
+                          onTouchEnd={(e) => {
+                            e.preventDefault()
+                            openVideoModal(allMedia[currentMediaIndex])
+                          }}
+                          style={{
+                            touchAction: 'manipulation',
+                            WebkitTouchCallout: 'none',
+                            WebkitUserSelect: 'none'
+                          }}
+                        >
                           <video
-                            className="w-full h-full object-cover"
+                            src={allMedia[currentMediaIndex].url}
+                            className="w-full h-full object-contain"
                             preload="metadata"
                             muted
                             playsInline
                             autoPlay
                             loop
+                            controls
                           >
-                            <source src={video.url} type="video/mp4" />
-                            <source src={video.url} type="video/quicktime" />
+                            <source src={allMedia[currentMediaIndex].url} type="video/mp4" />
+                            <source src={allMedia[currentMediaIndex].url} type="video/quicktime" />
                           </video>
                           {/* Play Button Overlay */}
                           <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="bg-white rounded-full p-3">
-                              <svg className="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                            <div className="w-20 h-20 bg-white bg-opacity-90 rounded-full flex items-center justify-center">
+                              <svg className="w-10 h-10 text-blue-600 ml-1" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M8 5v14l11-7z"/>
                               </svg>
                             </div>
                           </div>
                         </div>
-                      </div>
+                      ) : (
+                        <div 
+                          className="relative w-full h-full cursor-pointer"
+                          onClick={() => openImageModal(allMedia[currentMediaIndex])}
+                        >
+                          <img 
+                            src={allMedia[currentMediaIndex].url} 
+                            alt={allMedia[currentMediaIndex].name}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                      )}
                     </div>
-                  </ScrollAnimation>
-                ))
+                    
+                    {/* Navigasyon Butonları */}
+                    {allMedia.length > 1 && (
+                      <>
+                        {/* Sol/Sağ Ok Butonları */}
+                        <button
+                          onClick={prevSlide}
+                          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 z-10"
+                        >
+                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                          </svg>
+                        </button>
+                        
+                        <button
+                          onClick={nextSlide}
+                          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white text-gray-800 w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 z-10"
+                        >
+                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                        
+                        {/* Play/Pause Butonu */}
+                        <button
+                          onClick={() => setIsAutoPlaying(!isAutoPlaying)}
+                          className="absolute top-4 right-4 bg-white/90 hover:bg-white text-gray-800 w-10 h-10 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 z-10"
+                        >
+                          {isAutoPlaying ? (
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                            </svg>
+                          ) : (
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M8 5v14l11-7z"/>
+                            </svg>
+                          )}
+                        </button>
+                      </>
+                    )}
+                  </div>
+                  
+                  {/* Slayt Göstergeleri */}
+                  {allMedia.length > 1 && (
+                    <div className="flex justify-center mt-6 space-x-2">
+                      {allMedia.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => goToSlide(index)}
+                          className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                            index === currentMediaIndex 
+                              ? 'bg-blue-600 scale-125' 
+                              : 'bg-gray-300 hover:bg-gray-400'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Öğrenci Görüşleri */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <ScrollAnimation animation="slideUp" delay={200}>
-            <div className="text-center mb-16">
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Öğrencilerimizin deneyimleri, düşünceleri ve başarı hikayeleri
-              </p>
-            </div>
-          </ScrollAnimation>
+              
+              {/* Açıklama Yazısı */}
+              <div className="text-center mt-12 mb-6">
+                <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                  Öğrencilerimizin deneyimleri, düşünceleri ve başarı hikayeleri
+                </p>
+              </div>
+              
+              {/* Öğrenci Görüşleri */}
+              <div className="mt-6">
           
           {loadingOgrenciSesleri ? (
             <div className="flex items-center justify-center py-12">
@@ -237,6 +260,9 @@ export default function DersliktenSesler() {
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg">Henüz öğrenci görüşü bulunmuyor.</p>
             </div>
+          )}
+              </div>
+            </>
           )}
         </div>
       </section>

@@ -1,11 +1,13 @@
 'use client'
 
+import { useState } from 'react'
 import ScrollAnimation from '../components/ScrollAnimation'
 import { useContactForm } from '../hooks/useContactForm'
 import { formatPhoneNumber } from '../utils/validation'
 
 export default function Iletisim() {
   const { loading: contactLoading, error: contactError, success: contactSuccess, sendContactMail, clearForm, setFormError } = useContactForm()
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   // İletişim formu submit handler
   const handleContactSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -61,9 +63,12 @@ export default function Iletisim() {
       kvkkConsent
     })
 
-    // Form başarılıysa temizle
+    // Form başarılıysa temizle ve modal'ı kapat
     if (result && result.success && form) {
       form.reset()
+      setTimeout(() => {
+        setIsModalOpen(false)
+      }, 2000) // 2 saniye sonra modal'ı kapat
     }
   }
 
@@ -92,12 +97,13 @@ export default function Iletisim() {
             {/* Sol Taraf - İletişim Bilgileri */}
             <ScrollAnimation animation="slideLeft" delay={200}>
               <div className="space-y-8">
-                <div>
-                  <h2 className="text-3xl font-bold text-gray-800 mb-6">İletişim Bilgileri</h2>
-                  <p className="text-gray-600 mb-8">
-                    Derslik Kurs olarak öğrencilerimiz ve velilerimizle sürekli iletişim halinde olmaya özen gösteriyoruz.
-                  </p>
-                </div>
+                <div className="bg-white rounded-xl shadow-lg p-8">
+                  <div className="text-center mb-8">
+                    <h2 className="text-3xl font-bold text-gray-800 mb-6">İletişim Bilgileri</h2>
+                    <p className="text-gray-600">
+                      Derslik Kurs olarak öğrencilerimiz ve velilerimizle sürekli iletişim halinde olmaya özen gösteriyoruz.
+                    </p>
+                  </div>
 
                 <div className="space-y-6">
                   <div className="flex items-center space-x-4">
@@ -155,18 +161,19 @@ export default function Iletisim() {
                 </div>
 
                 {/* Çalışma Saatleri */}
-                <div className="bg-gray-50 p-6 rounded-xl w-fit">
-                  <h4 className="font-semibold text-gray-800 mb-3">Çalışma Saatleri</h4>
-                  <div className="space-y-2 text-gray-600">
+                <div className="bg-white rounded-xl shadow-lg p-8 w-fit">
+                  <h4 className="text-2xl font-bold text-gray-800 mb-6">Çalışma Saatleri</h4>
+                  <div className="space-y-4 text-gray-600">
                     <div className="flex flex-col sm:flex-row sm:items-baseline">
-                      <span className="font-medium sm:w-40 whitespace-nowrap">Hafta İçi:</span>
-                      <span className="font-medium sm:ml-20">09:00 - 20:00</span>
+                      <span className="font-semibold text-lg sm:w-40 whitespace-nowrap">Hafta İçi:</span>
+                      <span className="font-semibold text-lg sm:ml-20">09:00 - 20:00</span>
                     </div>
                     <div className="flex flex-col sm:flex-row sm:items-baseline">
-                      <span className="font-medium sm:w-40 whitespace-nowrap">Hafta Sonu:</span>
-                      <span className="font-medium sm:ml-20">09:00 - 17:00</span>
+                      <span className="font-semibold text-lg sm:w-40 whitespace-nowrap">Hafta Sonu:</span>
+                      <span className="font-semibold text-lg sm:ml-20">09:00 - 17:00</span>
                     </div>
                   </div>
+                </div>
                 </div>
               </div>
             </ScrollAnimation>
@@ -174,45 +181,63 @@ export default function Iletisim() {
             {/* Sağ Taraf - Harita ve Form */}
             <ScrollAnimation animation="slideRight" delay={400}>
               <div className="space-y-6">
-                {/* Harita */}
-                <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-800 mb-4">Derslik Kurs Nerede?</h3>
-                    <p className="text-gray-600 mb-4">Konumumuzu haritada görüntüleyin</p>
-                  </div>
-                  <div className="relative h-80 bg-gray-100 rounded-lg overflow-hidden">
-                    <iframe
-                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3011.7203594505972!2d29.02363569083446!3d40.98760379749061!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cab9f7cf06e913%3A0x5a9870ab783680be!2sDerslik%20Kurs!5e0!3m2!1str!2str!4v1756137423778!5m2!1str!2str"
-                      width="100%"
-                      height="100%"
-                      style={{ border: 0 }}
-                      allowFullScreen
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                      title="Derslik Kurs Konumu - Google Maps"
-                      className="w-full h-full"
-                    ></iframe>
-                  </div>
-                  <div className="p-6 bg-gray-50">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                      <div className="text-sm text-gray-600">
-                        <p className="font-medium">Derslik Kurs</p>
-                        <p>Eğitim ve öğretim merkezi</p>
+                {/* Konum Bilgisi */}
+                <div className="relative h-[500px] bg-white rounded-xl overflow-hidden shadow-lg">
+                  <div className="relative h-full flex items-center justify-center p-8">
+                    <div className="text-center max-w-2xl">
+                      <h3 className="text-3xl font-bold text-gray-800 mb-6">Merkezi Konum</h3>
+                      <p className="text-base text-gray-600 mb-6 leading-relaxed">
+                        Kadıköy'ün kalbinde, ulaşımın en kolay olduğu noktada yer alıyoruz. 
+                        Metro, otobüs, metrobüs, marmaray ve vapur ile kolayca ulaşabilirsiniz.
+                      </p>
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+                        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 text-center shadow-sm">
+                          <div className="text-xl mb-1">🚇</div>
+                          <p className="text-xs font-medium text-gray-800">Metro</p>
+                          <p className="text-xs text-gray-600">10 dk</p>
+                        </div>
+                        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 text-center shadow-sm">
+                          <div className="text-xl mb-1">🚌</div>
+                          <p className="text-xs font-medium text-gray-800">Otobüs</p>
+                          <p className="text-xs text-gray-600">13 dk</p>
+                        </div>
+               <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 text-center shadow-sm">
+                 <div className="text-xl mb-1">🚄</div>
+                 <p className="text-xs font-medium text-gray-800">Metrobüs</p>
+                 <p className="text-xs text-gray-600">15 dk</p>
+               </div>
+               <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 text-center shadow-sm">
+                 <div className="text-xl mb-1">🚊</div>
+                 <p className="text-xs font-medium text-gray-800">Marmaray</p>
+                 <p className="text-xs text-gray-600">15 dk</p>
+               </div>
+                        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 text-center shadow-sm">
+                          <div className="text-xl mb-1">🚢</div>
+                          <p className="text-xs font-medium text-gray-800">Vapur</p>
+                          <p className="text-xs text-gray-600">10 dk</p>
+                        </div>
                       </div>
-                      <a
-                        href="https://maps.app.goo.gl/6KSVaQLUj3G7Ga9PA"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium text-center"
-                      >
-                        Google Maps'te Aç
-                      </a>
+                      
+                      <div className="flex justify-center">
+                        <a
+                          href="https://maps.app.goo.gl/6KSVaQLUj3G7Ga9PA"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                        >
+                          <svg className="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                          </svg>
+                          Maps'te Aç
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* İletişim Formu */}
-                <div id="contact-form" className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                {/* İletişim Formu - Gizli */}
+                <div id="contact-form" className="hidden bg-white rounded-xl shadow-lg p-6 border border-gray-200">
                   <h3 className="text-2xl font-bold text-gray-800 mb-4">Mesaj Gönder</h3>
                   
                   {contactSuccess && (
@@ -335,7 +360,7 @@ export default function Iletisim() {
             </div>
           </ScrollAnimation>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 max-w-6xl mx-auto">
             <ScrollAnimation animation="zoomIn" delay={200}>
               <div className="bg-white rounded-xl p-8 text-center shadow-lg hover:shadow-xl transition-shadow">
                 <div className="text-4xl mb-4">📞</div>
@@ -343,7 +368,7 @@ export default function Iletisim() {
                 <p className="text-gray-600 mb-4">Telefon ile hızlı bilgi alın</p>
                 <a
                   href={`tel:+${process.env.NEXT_PUBLIC_WHATSAPP_PHONE}`}
-                  className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors inline-block"
+                  className="bg-green-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors inline-block text-sm sm:text-base break-all"
                 >
                   +{process.env.NEXT_PUBLIC_WHATSAPP_PHONE}
                 </a>
@@ -368,16 +393,25 @@ export default function Iletisim() {
             
             <ScrollAnimation animation="zoomIn" delay={600}>
               <div className="bg-white rounded-xl p-8 text-center shadow-lg hover:shadow-xl transition-shadow">
+                <div className="text-4xl mb-4">📧</div>
+                <h3 className="text-xl font-bold text-gray-800 mb-3">E-posta Gönder</h3>
+                <p className="text-gray-600 mb-4">E-posta ile iletişime geçin</p>
+                <a
+                  href="mailto:iletisim@derslikkurs.com"
+                  className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-block cursor-pointer"
+                >
+                  E-posta Gönder
+                </a>
+              </div>
+            </ScrollAnimation>
+            
+            <ScrollAnimation animation="zoomIn" delay={800}>
+              <div className="bg-white rounded-xl p-8 text-center shadow-lg hover:shadow-xl transition-shadow">
                 <div className="text-4xl mb-4">✉️</div>
                 <h3 className="text-xl font-bold text-gray-800 mb-3">Mesaj Gönder</h3>
                 <p className="text-gray-600 mb-4">Form ile mesaj gönderin</p>
                 <button
-                  onClick={() => {
-                    const formElement = document.querySelector('#contact-form');
-                    if (formElement) {
-                      formElement.scrollIntoView({ behavior: 'smooth' });
-                    }
-                  }}
+                  onClick={() => setIsModalOpen(true)}
                   className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-block cursor-pointer"
                 >
                   Mesaj Gönder
@@ -387,6 +421,170 @@ export default function Iletisim() {
           </div>
         </div>
       </section>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-600 via-blue-400 to-blue-200 rounded-t-3xl p-6 text-white">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-2xl font-bold">İletişim Formu</h2>
+                  <p className="text-blue-100 mt-1">Sorularınız için bizimle iletişime geçin</p>
+                </div>
+                <button
+                  onClick={() => {
+                    setIsModalOpen(false)
+                    clearForm()
+                  }}
+                  className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-200"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Form */}
+            <div className="p-8">
+              
+              {contactSuccess && (
+                <div className="mb-4 bg-green-50 border border-green-200 rounded-lg p-4">
+                  <p className="text-green-600 text-sm">✅ Mesajınız başarıyla gönderildi. En kısa sürede size dönüş yapacağız.</p>
+                </div>
+              )}
+
+              {contactError && (
+                <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-red-600 text-sm">{contactError}</p>
+                </div>
+              )}
+
+              <form onSubmit={handleContactSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Adınız *</label>
+                    <input
+                      type="text"
+                      name="ad"
+                      placeholder="Adınızı giriniz"
+                      minLength={2}
+                      maxLength={50}
+                      pattern="[A-Za-zğüşıöçĞÜŞİÖÇ\s]+"
+                      title="Ad en az 2, en fazla 50 karakter olmalıdır. Sadece harf ve boşluk karakterleri kullanabilirsiniz"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      disabled={contactLoading}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Soyadınız *</label>
+                    <input
+                      type="text"
+                      name="soyad"
+                      placeholder="Soyadınızı giriniz"
+                      minLength={2}
+                      maxLength={50}
+                      pattern="[A-Za-zğüşıöçĞÜŞİÖÇ\s]+"
+                      title="Soyad en az 2, en fazla 50 karakter olmalıdır. Sadece harf ve boşluk karakterleri kullanabilirsiniz"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                      disabled={contactLoading}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">E-posta Adresiniz *</label>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="ornek@email.com"
+                    maxLength={100}
+                    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                    title="Geçerli bir e-posta adresi giriniz"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    disabled={contactLoading}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Telefon Numaranız *</label>
+                  <input
+                    type="tel"
+                    name="telefon"
+                    placeholder="5XX XXX XX XX"
+                    maxLength={15}
+                    onChange={(e) => {
+                      const formatted = formatPhoneNumber(e.target.value)
+                      e.target.value = formatted
+                    }}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    disabled={contactLoading}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Mesajınız *</label>
+                  <textarea
+                    name="mesaj"
+                    placeholder="Mesajınızı buraya yazınız..."
+                    rows={4}
+                    maxLength={500}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
+                    disabled={contactLoading}
+                  ></textarea>
+                </div>
+
+                {/* KVKK Consent */}
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                  <div className="flex items-start space-x-3">
+                    <input
+                      type="checkbox"
+                      id="kvkkConsent"
+                      name="kvkkConsent"
+                      required
+                      className="mt-1 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      disabled={contactLoading}
+                    />
+                    <div>
+                      <label htmlFor="kvkkConsent" className="text-sm text-gray-700 leading-relaxed">
+                        <a 
+                          href="/kvkk" 
+                          target="_blank" 
+                          className="text-blue-600 hover:text-blue-800 underline font-medium"
+                        >
+                          KVKK Aydınlatma Metnini
+                        </a> okudum ve kişisel verilerimin işlenmesine açık rıza veriyorum. *
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsModalOpen(false)
+                      clearForm()
+                    }}
+                    className="flex-1 bg-gray-100 text-gray-700 py-4 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-200 border border-gray-200"
+                  >
+                    İptal
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={contactLoading}
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                  >
+                    {contactLoading ? 'Gönderiliyor...' : 'Mesaj Gönder'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
