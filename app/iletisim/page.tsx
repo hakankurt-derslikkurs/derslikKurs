@@ -182,51 +182,51 @@ export default function Iletisim() {
             <ScrollAnimation animation="slideRight" delay={400}>
               <div className="space-y-6">
                 {/* Konum Bilgisi */}
-                <div className="relative h-[500px] bg-white rounded-xl overflow-hidden shadow-lg">
-                  <div className="relative h-full flex items-center justify-center p-8">
-                    <div className="text-center max-w-2xl">
-                      <h3 className="text-3xl font-bold text-gray-800 mb-6">Merkezi Konum</h3>
-                      <p className="text-base text-gray-600 mb-6 leading-relaxed">
-                        Kadıköy'ün kalbinde, ulaşımın en kolay olduğu noktada yer alıyoruz. 
+                <div className="relative min-h-[500px] sm:min-h-[500px] lg:h-auto bg-white rounded-xl overflow-hidden shadow-lg">
+                  <div className="relative h-full flex flex-col justify-center items-center p-6 sm:p-6 lg:p-8 w-full lg:justify-start lg:pt-8">
+                    <div className="text-center w-full max-w-2xl mx-auto">
+                      <h3 className="text-3xl font-bold text-gray-800 mb-3 sm:mb-6">Merkezi Konum</h3>
+                      <p className="text-base text-gray-600 mb-3 sm:mb-6 leading-relaxed px-2">
+                        Kadıköy'ün kalbinde, ulaşımın en kolay olduğu noktada yer alıyoruz.
                         Metro, otobüs, metrobüs, marmaray ve vapur ile kolayca ulaşabilirsiniz.
                       </p>
-                      
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-                        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 text-center shadow-sm">
-                          <div className="text-xl mb-1">🚇</div>
-                          <p className="text-xs font-medium text-gray-800">Metro</p>
-                          <p className="text-xs text-gray-600">10 dk</p>
+
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3 mb-3 sm:mb-6 justify-items-center">
+                        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-2 sm:p-3 text-center shadow-sm">
+                          <div className="text-lg sm:text-xl mb-1">🚇</div>
+                          <p className="text-sm font-medium text-gray-800">Metro</p>
+                          <p className="text-sm text-gray-600">10 dk</p>
                         </div>
-                        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 text-center shadow-sm">
-                          <div className="text-xl mb-1">🚌</div>
-                          <p className="text-xs font-medium text-gray-800">Otobüs</p>
-                          <p className="text-xs text-gray-600">13 dk</p>
+                        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-2 sm:p-3 text-center shadow-sm">
+                          <div className="text-lg sm:text-xl mb-1">🚌</div>
+                          <p className="text-sm font-medium text-gray-800">Otobüs</p>
+                          <p className="text-sm text-gray-600">13 dk</p>
                         </div>
-               <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 text-center shadow-sm">
-                 <div className="text-xl mb-1">🚄</div>
-                 <p className="text-xs font-medium text-gray-800">Metrobüs</p>
-                 <p className="text-xs text-gray-600">15 dk</p>
-               </div>
-               <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 text-center shadow-sm">
-                 <div className="text-xl mb-1">🚊</div>
-                 <p className="text-xs font-medium text-gray-800">Marmaray</p>
-                 <p className="text-xs text-gray-600">15 dk</p>
-               </div>
-                        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 text-center shadow-sm">
-                          <div className="text-xl mb-1">🚢</div>
-                          <p className="text-xs font-medium text-gray-800">Vapur</p>
-                          <p className="text-xs text-gray-600">10 dk</p>
+                        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-2 sm:p-3 text-center shadow-sm">
+                          <div className="text-lg sm:text-xl mb-1">🚄</div>
+                          <p className="text-sm font-medium text-gray-800">Metrobüs</p>
+                          <p className="text-sm text-gray-600">15 dk</p>
+                        </div>
+                        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-2 sm:p-3 text-center shadow-sm">
+                          <div className="text-lg sm:text-xl mb-1">🚊</div>
+                          <p className="text-sm font-medium text-gray-800">Marmaray</p>
+                          <p className="text-sm text-gray-600">15 dk</p>
+                        </div>
+                        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-2 sm:p-3 text-center shadow-sm col-span-2 md:col-span-1">
+                          <div className="text-lg sm:text-xl mb-1">🚢</div>
+                          <p className="text-sm font-medium text-gray-800">Vapur</p>
+                          <p className="text-sm text-gray-600">10 dk</p>
                         </div>
                       </div>
-                      
-                      <div className="flex justify-center">
+
+                      <div className="flex justify-center items-center mt-3 sm:mt-6 px-2">
                         <a
                           href="https://maps.app.goo.gl/6KSVaQLUj3G7Ga9PA"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                          className="inline-flex items-center justify-center bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 sm:px-6 lg:px-8 py-3 sm:py-4 rounded-lg font-semibold text-base hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 w-full sm:w-auto max-w-xs"
                         >
-                          <svg className="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                          <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                           </svg>
                           Maps'te Aç
