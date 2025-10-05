@@ -87,7 +87,7 @@ export default function Hakkimizda() {
                 <div className="text-4xl mb-4">🎯</div>
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Misyonumuz</h3>
                 <p className="text-gray-700 leading-relaxed flex-grow">
-                  <strong className="font-black">Derslik Kurs</strong> olarak yılların eğitim deneyimini, her öğrencimizin bireysel ihtiyaç ve hedefleriyle buluşturuyoruz. Deneyimli öğretmen kadromuz ve uzman rehberlik hizmetimizle; birebir, grup ve sınıf ortamlarında etkili öğrenme deneyimleri sunuyoruz. Üniversite sınavlarına hazırlık ve okul derslerine destek programlarımızla, öğrencilerimize sadece akademik başarı kazandırmakla kalmıyor; rehberlik hizmetimizle öğrencilerimizin öz güvenlerini, motivasyonlarını ve öğrenme becerilerini de geliştiriyoruz. "Seninle aynı frekansta" diyerek öğrencilerimizle ortak bir hedef yolculuğunda, onlara en uygun eğitim modelini sunuyoruz.
+                  <strong className="font-black">Derslik Kurs</strong> olarak amacımız, öğrencilerimizin bireysel öğrenme ihtiyaçlarına uygun, hedef odaklı ve etkili bir eğitim deneyimi sunmaktır. Akademik başarının yanı sıra öğrencilerimizin özgüvenini, motivasyonunu ve öğrenme becerilerini geliştirerek sınavlara ve hayata donanımlı bireyler olarak hazırlanmalarını sağlıyoruz. "Seninle aynı frekansta" diyerek, her öğrencimizin yanında olduğumuzu hissettiren bir öğrenme ortamı inşa ediyoruz.
                 </p>
               </div>
             </ScrollAnimation>
@@ -96,7 +96,7 @@ export default function Hakkimizda() {
                 <div className="text-4xl mb-4">🌟</div>
                 <h3 className="text-2xl font-bold text-gray-800 mb-4">Vizyonumuz</h3>
                 <p className="text-gray-700 leading-relaxed flex-grow">
-                  Yılların bilgi birikimi ve deneyimiyle Türkiye'nin en güvenilir, öğrenci odaklı ve yenilikçi eğitim kurumlarından biri olmayı hedefliyoruz. Her öğrencimizin potansiyelini en üst seviyeye çıkarmak, başarı yolculuğunda ona ilham veren bir eğitim markası olmak için çalışıyoruz. Teknoloji ve çağdaş eğitim yaklaşımlarını harmanlayarak bireysel farklılıkları gözeten, sürekli gelişen ve başarı odaklı bir eğitim modeli ile hedeflerine ulaşan öğrenciler yetiştirmeyi amaçlıyoruz.
+                  Öğrenci odaklı yaklaşımı, çağdaş eğitim anlayışı ve teknolojiyle harmanlanmış modeliyle; her öğrencinin potansiyelini en üst seviyeye çıkaran, ona ilham veren ve başarı yolculuğuna eşlik eden öncü bir eğitim kurumu olmak.
                 </p>
               </div>
             </ScrollAnimation>

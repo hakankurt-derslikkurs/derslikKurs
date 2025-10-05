@@ -30,7 +30,7 @@ export default function Hizmetlerimiz() {
       icon: "/images/sınav_ikon.png",
       baslik: "Sınav Kulübü",
       aciklama: "Sınav sadece bilmek değil, doğru stratejiyi kullanmaktır. Sınav Kulübü; denemeler, kamplar, etkinlikler ve özel içeriklerle öğrencilerimize rekabetin içinde destek sunar.",
-      detay: "Sınavlara hazırlanmak sadece bilgi öğrenmek değil, aynı zamanda sınav anını yönetebilmektir. Derslik Sınav Kulübü, bu ihtiyaca özel olarak kurulmuş, öğrencilerin sınav pratiği ve stratejik düşünme becerilerini geliştirmeyi amaçlayan özel bir platformdur.\n\n• Her ay deneme sınavları ve sonuç analizleri\n• Soru çözüm kampları ve hızlandırılmış tekrar programları\n• Zaman yönetimi ve sınav psikolojisi eğitimleri\n• Başarı seminerleri ve rol model buluşmaları\n• Ödüllü yarışmalar ve motivasyon etkinlikleri\n\nSınav Kulübü, öğrenciyi yalnızca hazırlayan değil, aynı zamanda destekleyen bir yapıdır. Kazanmanın sadece çalışmak değil, doğru yöntemle çalışmak olduğunu birlikte gösteriyoruz."
+      detay: "Sınavlara hazırlanmak sadece bilgi öğrenmek değil, aynı zamanda sınav anını yönetebilmektir. Derslik Sınav Kulübü, bu ihtiyaca özel olarak kurulmuş, öğrencilerin sınav pratiği ve stratejik düşünme becerilerini geliştirmeyi amaçlayan özel bir platformdur.\n\n• Her hafta deneme sınavları ve sonuç analizleri\n• Soru çözüm kampları ve hızlandırılmış tekrar programları\n• Zaman yönetimi ve sınav psikolojisi eğitimleri\n• Başarı seminerleri ve rol model buluşmaları\n• Ödüllü yarışmalar ve motivasyon etkinlikleri\n\nSınav Kulübü, öğrenciyi yalnızca hazırlayan değil, aynı zamanda destekleyen bir yapıdır. Kazanmanın sadece çalışmak değil, doğru yöntemle çalışmak olduğunu birlikte gösteriyoruz."
     }
   ]
 
