@@ -206,7 +206,7 @@ export default function Home() {
                     onClick={() => setIsTanismaDersiOpen(true)}
                     className="bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-colors shadow-lg"
                   >
-                    Tanışma Dersi Başvurusu
+                    Yazılı Kampı Başvurusu
                   </button>
                   <a
                     href="/hizmetlerimiz"
