@@ -203,8 +203,8 @@ export default function TanismaDersiPopup({ isOpen, onClose }: TanismaDersiPopup
         <div className="bg-gradient-to-r from-blue-600 via-blue-400 to-blue-200 rounded-t-3xl p-6 text-white">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-bold">Yazılı Kampı Başvurusu</h2>
-              <p className="text-blue-100 mt-1">Yazılı kampı için başvuru yapın</p>
+              <h2 className="text-2xl font-bold">Tanışma Dersi Başvurusu</h2>
+              <p className="text-blue-100 mt-1">Ücretsiz tanışma dersi için başvuru yapın</p>
             </div>
             <button
               onClick={onClose}
@@ -438,7 +438,7 @@ export default function TanismaDersiPopup({ isOpen, onClose }: TanismaDersiPopup
             {/* Subject Selection */}
             <div className="space-y-3">
               <label className="block text-sm font-semibold text-gray-700">
-              Hangi dersten yazılı çalışması istiyorsunuz? *
+                Hangi Derslerden Tanışma Dersi İstiyorsunuz? *
               </label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {['Matematik', 'Geometri', 'Türkçe', 'Fizik', 'Kimya', 'Biyoloji', 'Coğrafya', 'Tarih'].map((subject) => (

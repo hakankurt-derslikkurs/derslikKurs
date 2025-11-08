@@ -68,7 +68,7 @@ export default function Footer() {
                 onClick={() => setIsTanismaDersiOpen(true)}
                 className="text-gray-300 hover:text-white transition-colors cursor-pointer"
               >
-                Yazılı Kampı Başvurusu
+                Tanışma Dersi Başvurusu
               </button>
               <Link href="/iletisim" className="text-gray-300 hover:text-white transition-colors">
                 İletişim
