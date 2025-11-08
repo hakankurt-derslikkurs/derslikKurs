@@ -43,22 +43,27 @@ export default function Navigation() {
             </Link>
             <div className="relative group">
               <button className="text-white hover:text-blue-200 transition-colors font-medium flex items-center">
-                Dijital Derslik
+                Online Derslik
                 <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-              <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+              <div className="absolute top-full left-0 mt-2 w-60 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                 <div className="py-2">
-                  <a href="https://sistem.xysinav.com/" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50">
-                    Öğrenci Girişi
+                  <a
+                    href="https://sistem.xysinav.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50"
+                  >
+                    Deneme Sınavı Sonuçları
                   </a>
-                  <a href="https://sistem.xysinav.com/" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50">
-                    Veli Girişi
-                  </a>
-                  <a href="https://sistem.xysinav.com/" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50">
-                    Kurumsal Giriş
-                  </a>
+                  <Link
+                    href="/online-canli-dersler"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50"
+                  >
+                    Online Canlı Dersler
+                  </Link>
                 </div>
               </div>
             </div>
@@ -132,17 +137,24 @@ export default function Navigation() {
                 Derslik'ten Sesler
               </Link>
               <div className="space-y-2">
-                <div className="text-white font-medium">Dijital Derslik</div>
+                <div className="text-white font-medium">Online Derslik</div>
                 <div className="ml-4 space-y-2">
-                  <a href="https://sistem.xysinav.com/" target="_blank" rel="noopener noreferrer" className="block text-blue-100 hover:text-blue-200 transition-colors" onClick={() => setIsMenuOpen(false)}>
-                    Öğrenci Girişi
+                  <a
+                    href="https://sistem.xysinav.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-blue-100 hover:text-blue-200 transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Deneme Sınavı Sonuçları
                   </a>
-                  <a href="https://sistem.xysinav.com/" target="_blank" rel="noopener noreferrer" className="block text-blue-100 hover:text-blue-200 transition-colors" onClick={() => setIsMenuOpen(false)}>
-                    Veli Girişi
-                  </a>
-                  <a href="https://sistem.xysinav.com/" target="_blank" rel="noopener noreferrer" className="block text-blue-100 hover:text-blue-200 transition-colors" onClick={() => setIsMenuOpen(false)}>
-                    Kurumsal Giriş
-                  </a>
+                  <Link
+                    href="/online-canli-dersler"
+                    className="block text-blue-100 hover:text-blue-200 transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Online Canlı Dersler
+                  </Link>
                 </div>
               </div>
               <div className="space-y-2">
