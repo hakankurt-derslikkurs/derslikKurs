@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { edgeFunctions } from '@/app/utils/supabase-edge'
-import { validateTC, validateBirthDate, validatePhone, validateEmail, validateName } from '@/app/utils/validation'
+import { validateTC, validatePhone, validateEmail, validateName } from '@/app/utils/validation'
 
 interface BurslulukBasvuruData {
   name: string
@@ -55,8 +55,11 @@ export function useBurslulukBasvuru() {
       setIsSubmitted(false)
       
       // Frontend validation - Backend'e göndermeden önce kontrol et
+      // Doğum tarihi için DD.MM.YYYY formatını kontrol et (yaş kontrolü yok)
+      const isValidBirthDate = data.birthDate && data.birthDate.trim() !== '' && /^\d{2}\.\d{2}\.\d{4}$/.test(data.birthDate.trim())
+      
       if (!validateName(data.name) || !validateName(data.surname) || !validateTC(data.tc) || 
-          !validateBirthDate(data.birthDate) || !validatePhone(data.phone) || !validateEmail(data.email) ||
+          !isValidBirthDate || !validatePhone(data.phone) || !validateEmail(data.email) ||
           !validateName(data.parentName) || !validateName(data.parentSurname) || 
           !validatePhone(data.parentPhone) || !validateEmail(data.parentEmail) || !data.kvkkConsent) {
         setError('Form gönderilemedi. Lütfen bilgilerinizi kontrol ediniz.')
@@ -89,8 +92,8 @@ export function useBurslulukBasvuru() {
           typeof error.message === 'string' && 
           (error.message.includes('409') || error.message.includes('Conflict') || 
            error.message.includes('duplicate') || error.message.includes('already exists') ||
-           error.message.includes('Aynı T.C. Kimlik No'))) {
-        setError('Aynı T.C. Kimlik No ile giriş yapılmıştır.')
+           error.message.includes('Bu TC ile başvuru zaten var'))) {
+        setError('Bu TC ile başvuru zaten var')
       } else {
         setError('Form gönderilemedi. Lütfen bilgilerinizi kontrol ediniz.')
       }

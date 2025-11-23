@@ -4,10 +4,12 @@ import { edgeFunctions } from '@/app/utils/supabase-edge'
 // Global cache için
 let examDatesCache: ExamDate[] | null = null
 let hasNoExamDatesCache: boolean = false
+let examDurationCache: number = 120 // Default 120 dakika
 let cacheTimestamp: number = 0
 const CACHE_DURATION = 5 * 60 * 1000 // 5 dakika
 const CACHE_KEY = 'derslik_exam_dates_cache'
 const HAS_NO_EXAM_DATES_KEY = 'derslik_has_no_exam_dates_cache'
+const EXAM_DURATION_KEY = 'derslik_exam_duration_cache'
 const TIMESTAMP_KEY = 'derslik_exam_dates_timestamp'
 
 interface ExamDate {
@@ -17,6 +19,7 @@ interface ExamDate {
 interface ExamDatesResponse {
   data: ExamDate[]
   hasNoExamDates: boolean
+  examDuration?: number
 }
 
 // Edge function response type
@@ -25,6 +28,7 @@ type EdgeFunctionResponse = ExamDate[] | ExamDatesResponse
 export function useExamDates() {
   const [examDates, setExamDates] = useState<ExamDate[]>([])
   const [hasNoExamDates, setHasNoExamDates] = useState(false)
+  const [examDuration, setExamDuration] = useState<number>(120) // Default 120 dakika
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
@@ -53,6 +57,7 @@ export function useExamDates() {
     if (canUseCache && !forceRefresh && examDatesCache && (now - cacheTimestamp) < CACHE_DURATION) {
       setExamDates(examDatesCache)
       setHasNoExamDates(hasNoExamDatesCache)
+      setExamDuration(examDurationCache)
       return examDatesCache
     }
     
@@ -61,6 +66,7 @@ export function useExamDates() {
       try {
         const storedData = localStorage.getItem(CACHE_KEY)
         const storedHasNoExamDates = localStorage.getItem(HAS_NO_EXAM_DATES_KEY)
+        const storedExamDuration = localStorage.getItem(EXAM_DURATION_KEY)
         const storedTimestamp = localStorage.getItem(TIMESTAMP_KEY)
         
         if (storedData && storedTimestamp) {
@@ -68,13 +74,16 @@ export function useExamDates() {
           if ((now - timestamp) < CACHE_DURATION) {
             const parsedData = JSON.parse(storedData)
             const parsedHasNoExamDates = storedHasNoExamDates === 'true'
+            const parsedExamDuration = storedExamDuration ? parseInt(storedExamDuration) : 120
             
             examDatesCache = parsedData
             hasNoExamDatesCache = parsedHasNoExamDates
+            examDurationCache = parsedExamDuration
             cacheTimestamp = timestamp
             
             setExamDates(parsedData)
             setHasNoExamDates(parsedHasNoExamDates)
+            setExamDuration(parsedExamDuration)
             return parsedData
           }
         }
@@ -90,18 +99,22 @@ export function useExamDates() {
       
       let examDatesList: ExamDate[] = []
       let hasNoExamDatesFlag = false
+      let examDurationValue = 120 // Default 120 dakika
       
       if (Array.isArray(response)) {
         examDatesList = response
       } else if (response && typeof response === 'object' && 'data' in response && Array.isArray(response.data)) {
         examDatesList = response.data
         hasNoExamDatesFlag = response.hasNoExamDates || false
+        examDurationValue = response.examDuration || 120
       } else if (response && typeof response === 'object' && 'data' in response) {
         examDatesList = response.data || []
         hasNoExamDatesFlag = response.hasNoExamDates || false
+        examDurationValue = response.examDuration || 120
       } else if (response && typeof response === 'object') {
         // Response object ama data property'si yok, hasNoExamDates root seviyesinde olabilir
         hasNoExamDatesFlag = (response as ExamDatesResponse).hasNoExamDates || false
+        examDurationValue = (response as ExamDatesResponse).examDuration || 120
       }
       
       // Tarihleri sırala (en erken tarih önce) - null/undefined kontrolü eklendi
@@ -117,12 +130,14 @@ export function useExamDates() {
       if (canUseCache) {
         examDatesCache = sortedExamDates
         hasNoExamDatesCache = hasNoExamDatesFlag
+        examDurationCache = examDurationValue
         cacheTimestamp = now
 
         // localStorage'a kaydet
         try {
           localStorage.setItem(CACHE_KEY, JSON.stringify(sortedExamDates))
           localStorage.setItem(HAS_NO_EXAM_DATES_KEY, hasNoExamDatesFlag.toString())
+          localStorage.setItem(EXAM_DURATION_KEY, examDurationValue.toString())
           localStorage.setItem(TIMESTAMP_KEY, now.toString())
         } catch (error) {
         }
@@ -130,6 +145,7 @@ export function useExamDates() {
 
       setExamDates(sortedExamDates)
       setHasNoExamDates(hasNoExamDatesFlag)
+      setExamDuration(examDurationValue)
       return sortedExamDates
     } catch (err: any) {
       const errorMessage = err.message || 'Sınav tarihleri yüklenirken hata oluştu'
@@ -144,12 +160,14 @@ export function useExamDates() {
   const clearCache = useCallback(() => {
     examDatesCache = null
     hasNoExamDatesCache = false
+    examDurationCache = 120
     cacheTimestamp = 0
     
     // localStorage'dan da temizle
     try {
       localStorage.removeItem(CACHE_KEY)
       localStorage.removeItem(HAS_NO_EXAM_DATES_KEY)
+      localStorage.removeItem(EXAM_DURATION_KEY)
       localStorage.removeItem(TIMESTAMP_KEY)
     } catch (error) {
     }
@@ -168,6 +186,7 @@ export function useExamDates() {
   return {
     examDates,
     hasNoExamDates,
+    examDuration,
     loading,
     error,
     refresh,

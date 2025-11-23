@@ -8,6 +8,25 @@ export async function invokeEdgeFunction(functionName: string, data?: any) {
   })
   
   if (error) {
+    // Error objesi içinde response body olabilir, kontrol et
+    if (error && typeof error === 'object' && 'context' in error) {
+      const context = (error as any).context
+      if (context && context.body) {
+        // Response body'yi parse et ve error mesajını içeriyorsa kullan
+        try {
+          const parsedBody = typeof context.body === 'string' ? JSON.parse(context.body) : context.body
+          if (parsedBody && parsedBody.error) {
+            // Response body'deki error mesajını kullan
+            const customError = new Error(parsedBody.error)
+            ;(customError as any).status = context.status
+            ;(customError as any).responseBody = parsedBody
+            throw customError
+          }
+        } catch (parseError) {
+          // Parse edilemezse orijinal error'ı throw et
+        }
+      }
+    }
     throw error
   }
   
@@ -72,6 +91,50 @@ export const edgeFunctions = {
       
       return result
     } catch (error) {
+      // Debug: Error objesini log'la
+      console.error('🔍 submitBurslulukBasvuru error:', error)
+      
+      // Error objesi içinde response body varsa, onu kullan
+      if (error && typeof error === 'object' && 'responseBody' in error) {
+        const responseBody = (error as any).responseBody
+        if (responseBody && responseBody.error) {
+          return {
+            success: false,
+            error: responseBody.error,
+            details: responseBody.details || responseBody.error,
+            timestamp: responseBody.timestamp || new Date().toISOString()
+          }
+        }
+      }
+      
+      // Error objesi içinde context varsa, onu kontrol et
+      if (error && typeof error === 'object' && 'context' in error) {
+        const context = (error as any).context
+        if (context && context.body) {
+          try {
+            const parsedBody = typeof context.body === 'string' ? JSON.parse(context.body) : context.body
+            if (parsedBody && parsedBody.error) {
+              return {
+                success: false,
+                error: parsedBody.error,
+                details: parsedBody.details || parsedBody.error,
+                timestamp: parsedBody.timestamp || new Date().toISOString()
+              }
+            }
+          } catch (parseError) {
+            // Parse edilemezse devam et
+          }
+        }
+        // Context'te status code varsa kontrol et
+        if (context && context.status === 409) {
+          return {
+            success: false,
+            error: 'Bu TC ile başvuru zaten var',
+            details: 'Bu TC ile başvuru zaten var',
+            timestamp: new Date().toISOString()
+          }
+        }
+      }
       
       // Rate limiting hatası kontrolü (429 status code)
       if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string' && error.message.includes('429')) {
@@ -84,34 +147,36 @@ export const edgeFunctions = {
       }
       
       // Eğer hata "non-2xx status code" ise, gerçek hatayı döndür
-      if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string' && error.message.includes('non-2xx status code')) {
+      if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
         // 409 hatası için özel mesaj
         if (error.message.includes('409') || error.message.includes('Conflict')) {
           return {
             success: false,
-            error: 'Aynı T.C. Kimlik No ile giriş yapılmıştır.',
-            details: 'Aynı T.C. Kimlik No ile giriş yapılmıştır.',
+            error: 'Bu TC ile başvuru zaten var',
+            details: 'Bu TC ile başvuru zaten var',
             timestamp: new Date().toISOString()
           }
         }
         
-        return {
-          success: false,
-          error: 'SERVER_ERROR',
-          details: 'Sunucu hatası. Lütfen tekrar deneyin.',
-          timestamp: new Date().toISOString()
+        // Duplicate veya already exists kontrolü
+        if (error.message.includes('duplicate') || error.message.includes('already exists') || 
+            error.message.includes('Bu TC ile başvuru zaten var')) {
+          return {
+            success: false,
+            error: 'Bu TC ile başvuru zaten var',
+            details: 'Bu TC ile başvuru zaten var',
+            timestamp: new Date().toISOString()
+          }
         }
-      }
-      
-      // Eğer hata 409 ise, TC kimlik no tekrarı hatası
-      if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string' && 
-          (error.message.includes('409') || error.message.includes('Conflict') || 
-           error.message.includes('duplicate') || error.message.includes('already exists'))) {
-        return {
-          success: false,
-          error: 'Aynı T.C. Kimlik No ile giriş yapılmıştır.',
-          details: 'Aynı T.C. Kimlik No ile giriş yapılmıştır.',
-          timestamp: new Date().toISOString()
+        
+        // Diğer non-2xx hataları
+        if (error.message.includes('non-2xx status code')) {
+          return {
+            success: false,
+            error: 'SERVER_ERROR',
+            details: 'Sunucu hatası. Lütfen tekrar deneyin.',
+            timestamp: new Date().toISOString()
+          }
         }
       }
       
@@ -142,7 +207,7 @@ export const edgeFunctions = {
   
   
   // Sınav tarihlerini getir
-  getExamDates: async (): Promise<{value: string, label: string}[] | {data: {value: string, label: string}[], hasNoExamDates: boolean}> => {
+  getExamDates: async (): Promise<{value: string, label: string}[] | {data: {value: string, label: string}[], hasNoExamDates: boolean, examDuration?: number}> => {
     try {
       const result = await invokeEdgeFunction('get-exam-dates')
       
@@ -151,14 +216,19 @@ export const edgeFunctions = {
         if (result.success === false) {
           return []
         }
+        // examDuration'ı da döndür
+        if ('examDuration' in result) {
+          return result as {data: {value: string, label: string}[], hasNoExamDates: boolean, examDuration: number}
+        }
       }
       
       // Response formatını kontrol et - get-exam-dates edge function'ından gelen format
       if (result && result.success && result.data) {
-        // Edge function'dan gelen format: { success: true, data: [...], hasNoExamDates: boolean }
+        // Edge function'dan gelen format: { success: true, data: [...], hasNoExamDates: boolean, examDuration: number }
         return {
           data: result.data || [],
-          hasNoExamDates: result.hasNoExamDates || false
+          hasNoExamDates: result.hasNoExamDates || false,
+          examDuration: result.examDuration || 120
         }
       } else if (Array.isArray(result)) {
         // Direkt array formatı

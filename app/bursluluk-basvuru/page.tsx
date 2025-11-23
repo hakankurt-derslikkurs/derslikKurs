@@ -34,7 +34,7 @@ export default function BurslulukBasvuru() {
 
   const [errors, setErrors] = useState<{[key: string]: string}>({})
   const { schools, loading: loadingSchools } = useSchools()
-  const { examDates, hasNoExamDates, loading: loadingExamDates } = useExamDates()
+  const { examDates, hasNoExamDates, examDuration, loading: loadingExamDates } = useExamDates()
   const { submitBurslulukBasvuru, isLoading, isSubmitted, error, resetForm } = useBurslulukBasvuru()
 
   // Sınav tarihi yoksa form yerine mesaj göster (hasNoExamDates true ise form açılır)
@@ -125,13 +125,87 @@ export default function BurslulukBasvuru() {
     // Validation
     const newErrors: {[key: string]: string} = {}
     
-    // Tüm validasyonları kontrol et
-    if (!validateName(formData.name) || !validateName(formData.surname) || !validateTC(formData.tc) || 
-        !validateBirthDate(formData.birthDate) || !validatePhone(formData.phone) || 
-        !formData.email || !validateEmail(formData.email) || !validateName(formData.parentName) || 
-        !validateName(formData.parentSurname) || !validatePhone(formData.parentPhone) || 
-        !formData.parentEmail || !validateEmail(formData.parentEmail) || 
-        (!hasNoExamDates && !formData.examDate) || !formData.kvkkConsent) {
+    // Her alanı ayrı ayrı kontrol et ve spesifik hata mesajları ver
+    if (!validateName(formData.name)) {
+      newErrors.name = 'Geçerli bir ad giriniz (2-50 karakter, sadece harf)'
+    }
+    
+    if (!validateName(formData.surname)) {
+      newErrors.surname = 'Geçerli bir soyad giriniz (2-50 karakter, sadece harf)'
+    }
+    
+    if (!validateTC(formData.tc)) {
+      newErrors.tc = 'Geçerli bir T.C. kimlik numarası giriniz'
+    }
+    
+    // Doğum tarihi validasyonu - DD.MM.YYYY formatında olmalı
+    if (!formData.birthDate || formData.birthDate.trim() === '') {
+      newErrors.birthDate = 'Doğum tarihi gereklidir'
+    } else {
+      // DD.MM.YYYY formatını kontrol et
+      const dateRegex = /^\d{2}\.\d{2}\.\d{4}$/
+      if (!dateRegex.test(formData.birthDate.trim())) {
+        newErrors.birthDate = 'Doğum tarihi GG.AA.YYYY formatında olmalıdır (örn: 18.01.1997)'
+      } else {
+        // Geçerli bir tarih olup olmadığını kontrol et
+        const [day, month, year] = formData.birthDate.trim().split('.')
+        const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
+        if (isNaN(date.getTime()) || 
+            date.getDate() !== parseInt(day) || 
+            date.getMonth() !== parseInt(month) - 1 || 
+            date.getFullYear() !== parseInt(year)) {
+          newErrors.birthDate = 'Geçerli bir doğum tarihi giriniz'
+        }
+      }
+    }
+    
+    if (!validatePhone(formData.phone)) {
+      newErrors.phone = 'Geçerli bir telefon numarası giriniz (5XX XXX XX XX formatında)'
+    }
+    
+    if (!formData.email || !validateEmail(formData.email)) {
+      newErrors.email = 'Geçerli bir e-posta adresi giriniz'
+    }
+    
+    if (!validateName(formData.parentName)) {
+      newErrors.parentName = 'Geçerli bir veli adı giriniz (2-50 karakter, sadece harf)'
+    }
+    
+    if (!validateName(formData.parentSurname)) {
+      newErrors.parentSurname = 'Geçerli bir veli soyadı giriniz (2-50 karakter, sadece harf)'
+    }
+    
+    if (!validatePhone(formData.parentPhone)) {
+      newErrors.parentPhone = 'Geçerli bir veli telefon numarası giriniz (5XX XXX XX XX formatında)'
+    }
+    
+    if (!formData.parentEmail || !validateEmail(formData.parentEmail)) {
+      newErrors.parentEmail = 'Geçerli bir veli e-posta adresi giriniz'
+    }
+    
+    // Okul, sınıf ve alan validasyonu
+    if (!formData.school || formData.school.trim() === '') {
+      newErrors.school = 'Okul adı gereklidir'
+    }
+    
+    if (!formData.grade || formData.grade.trim() === '') {
+      newErrors.grade = 'Sınıf seçiniz'
+    }
+    
+    if (!formData.examType || formData.examType.trim() === '') {
+      newErrors.examType = 'Alan seçiniz'
+    }
+    
+    if (!hasNoExamDates && !formData.examDate) {
+      newErrors.examDate = 'Sınav tarihi seçiniz'
+    }
+    
+    if (!formData.kvkkConsent) {
+      newErrors.kvkkConsent = 'KVKK aydınlatma metnini kabul etmelisiniz'
+    }
+    
+    // Genel hata mesajı
+    if (Object.keys(newErrors).length > 0) {
       newErrors.general = 'Form gönderilemedi. Lütfen bilgilerinizi kontrol ediniz.'
     }
     
@@ -141,6 +215,7 @@ export default function BurslulukBasvuru() {
       return
     }
     
+    // Doğum tarihi zaten DD.MM.YYYY formatında, olduğu gibi gönder
     // Sınav tarihi yoksa otomatik değer ata
     const finalFormData = {
       ...formData,
@@ -246,7 +321,7 @@ export default function BurslulukBasvuru() {
                     </svg>
                   </div>
                   <h3 className="font-semibold text-gray-800 mb-2 text-center">Sınav Süresi</h3>
-                  <p className="text-gray-600 text-center">165 Dakika</p>
+                  <p className="text-gray-600 text-center">{examDuration} Dakika</p>
                 </div>
               </ScrollAnimation>
               <ScrollAnimation animation="zoomIn" delay={400}>
@@ -376,8 +451,11 @@ export default function BurslulukBasvuru() {
                           value={formData.name}
                           onChange={handleChange}
                           required
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            errors.name ? 'border-red-500' : 'border-gray-300'
+                          }`}
                         />
+                        {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
                       </div>
                       <div>
                         <label htmlFor="surname" className="block text-sm font-medium text-gray-700 mb-2">
@@ -390,8 +468,11 @@ export default function BurslulukBasvuru() {
                           value={formData.surname}
                           onChange={handleChange}
                           required
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            errors.surname ? 'border-red-500' : 'border-gray-300'
+                          }`}
                         />
+                        {errors.surname && <p className="mt-1 text-sm text-red-600">{errors.surname}</p>}
                       </div>
                       <div>
                         <label htmlFor="tc" className="block text-sm font-medium text-gray-700 mb-2">
@@ -406,24 +487,30 @@ export default function BurslulukBasvuru() {
                           required
                           maxLength={11}
                           pattern="[0-9]{11}"
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            errors.tc ? 'border-red-500' : 'border-gray-300'
+                          }`}
                         />
+                        {errors.tc && <p className="mt-1 text-sm text-red-600">{errors.tc}</p>}
                       </div>
                       <div>
                         <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700 mb-2">
-                          Doğum Tarihi *
+                          Doğum Tarihi * (GG.AA.YYYY)
                         </label>
                         <input
-                          type="date"
+                          type="text"
                           id="birthDate"
                           name="birthDate"
                           value={formData.birthDate}
                           onChange={handleChange}
                           required
-                          min="1900-01-01"
-                          max={new Date().toISOString().split('T')[0]}
-                          className="w-full px-3 py-2 sm:px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 date-input text-sm sm:text-base"
+                          placeholder="18.01.1997"
+                          maxLength={10}
+                          className={`w-full px-3 py-2 sm:px-4 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 text-sm sm:text-base ${
+                            errors.birthDate ? 'border-red-500' : 'border-gray-300'
+                          }`}
                         />
+                        {errors.birthDate && <p className="mt-1 text-sm text-red-600">{errors.birthDate}</p>}
                       </div>
                       <div>
                         <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
@@ -436,9 +523,12 @@ export default function BurslulukBasvuru() {
                           value={formData.phone}
                           onChange={handleChange}
                           required
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            errors.phone ? 'border-red-500' : 'border-gray-300'
+                          }`}
                           placeholder="5XX XXX XX XX"
                         />
+                        {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone}</p>}
                       </div>
                       <div>
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
@@ -451,8 +541,11 @@ export default function BurslulukBasvuru() {
                           value={formData.email}
                           onChange={handleChange}
                           required
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            errors.email ? 'border-red-500' : 'border-gray-300'
+                          }`}
                         />
+                        {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
                       </div>
                     </div>
                   </div>
@@ -472,8 +565,11 @@ export default function BurslulukBasvuru() {
                           value={formData.parentName}
                           onChange={handleChange}
                           required
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            errors.parentName ? 'border-red-500' : 'border-gray-300'
+                          }`}
                         />
+                        {errors.parentName && <p className="mt-1 text-sm text-red-600">{errors.parentName}</p>}
                       </div>
                       <div>
                         <label htmlFor="parentSurname" className="block text-sm font-medium text-gray-700 mb-2">
@@ -486,8 +582,11 @@ export default function BurslulukBasvuru() {
                           value={formData.parentSurname}
                           onChange={handleChange}
                           required
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            errors.parentSurname ? 'border-red-500' : 'border-gray-300'
+                          }`}
                         />
+                        {errors.parentSurname && <p className="mt-1 text-sm text-red-600">{errors.parentSurname}</p>}
                       </div>
                       <div>
                         <label htmlFor="parentPhone" className="block text-sm font-medium text-gray-700 mb-2">
@@ -500,9 +599,12 @@ export default function BurslulukBasvuru() {
                           value={formData.parentPhone}
                           onChange={handleChange}
                           required
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            errors.parentPhone ? 'border-red-500' : 'border-gray-300'
+                          }`}
                           placeholder="5XX XXX XX XX"
                         />
+                        {errors.parentPhone && <p className="mt-1 text-sm text-red-600">{errors.parentPhone}</p>}
                       </div>
                       <div>
                         <label htmlFor="parentEmail" className="block text-sm font-medium text-gray-700 mb-2">
@@ -515,8 +617,11 @@ export default function BurslulukBasvuru() {
                           value={formData.parentEmail}
                           onChange={handleChange}
                           required
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            errors.parentEmail ? 'border-red-500' : 'border-gray-300'
+                          }`}
                         />
+                        {errors.parentEmail && <p className="mt-1 text-sm text-red-600">{errors.parentEmail}</p>}
                       </div>
                     </div>
                   </div>
@@ -546,7 +651,9 @@ export default function BurslulukBasvuru() {
                                   placeholder="Okul adını yazın veya listeden seçin..."
                                   value={schoolSearch}
                                   onChange={(e) => handleSchoolSearch(e.target.value)}
-                                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                                    errors.school ? 'border-red-500' : 'border-gray-300'
+                                  }`}
                                 />
                                 
                                 {/* Arama sonuçları dropdown */}
@@ -636,6 +743,7 @@ export default function BurslulukBasvuru() {
                             )}
                           </div>
                         )}
+                        {errors.school && <p className="mt-1 text-sm text-red-600">{errors.school}</p>}
                       </div>
                       <div>
                         <label htmlFor="grade" className="block text-sm font-medium text-gray-700 mb-2">
@@ -647,13 +755,16 @@ export default function BurslulukBasvuru() {
                           value={formData.grade}
                           onChange={handleChange}
                           required
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            errors.grade ? 'border-red-500' : 'border-gray-300'
+                          }`}
                         >
                           <option value="">Sınıf seçiniz</option>
                           <option value="9">9. Sınıf</option>
                           <option value="10">10. Sınıf</option>
                           <option value="11">11. Sınıf</option>
                         </select>
+                        {errors.grade && <p className="mt-1 text-sm text-red-600">{errors.grade}</p>}
                       </div>
                       <div>
                         <label htmlFor="examType" className="block text-sm font-medium text-gray-700 mb-2">
@@ -665,12 +776,15 @@ export default function BurslulukBasvuru() {
                           value={formData.examType}
                           onChange={handleChange}
                           required
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            errors.examType ? 'border-red-500' : 'border-gray-300'
+                          }`}
                         >
                           <option value="">Alan seçiniz</option>
                           <option value="MF">MF (Sayısal)</option>
                           <option value="TM">TM (Eşit Ağırlık)</option>
                         </select>
+                        {errors.examType && <p className="mt-1 text-sm text-red-600">{errors.examType}</p>}
                       </div>
                       <div>
                         <label htmlFor="examDate" className="block text-sm font-medium text-gray-700 mb-2">
@@ -694,7 +808,9 @@ export default function BurslulukBasvuru() {
                             value={formData.examDate}
                             onChange={handleChange}
                             required
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                              errors.examDate ? 'border-red-500' : 'border-gray-300'
+                            }`}
                           >
                             <option value="">Sınav tarihi seçiniz</option>
                             {examDates.map((date) => (
@@ -704,6 +820,7 @@ export default function BurslulukBasvuru() {
                             ))}
                           </select>
                         )}
+                        {errors.examDate && <p className="mt-1 text-sm text-red-600">{errors.examDate}</p>}
                       </div>
                     </div>
                   </div>
@@ -725,7 +842,7 @@ export default function BurslulukBasvuru() {
                   </div>
 
                   {/* KVKK Consent */}
-                  <div className="bg-blue-50 p-4 rounded-lg">
+                  <div className={`bg-blue-50 p-4 rounded-lg ${errors.kvkkConsent ? 'border-2 border-red-500' : ''}`}>
                     <div className="flex items-start space-x-3">
                       <input
                         type="checkbox"
@@ -745,6 +862,7 @@ export default function BurslulukBasvuru() {
                             KVKK Aydınlatma Metnini
                           </a> okudum ve kişisel verilerimin işlenmesine açık rıza veriyorum. *
                         </label>
+                        {errors.kvkkConsent && <p className="mt-1 text-sm text-red-600">{errors.kvkkConsent}</p>}
                       </div>
                     </div>
                   </div>
@@ -752,12 +870,34 @@ export default function BurslulukBasvuru() {
                   {/* Error display */}
                   {(errors.general || errors.submit || error) && (
                     <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-                      <div className="flex items-start">
+                      <div className="flex items-start mb-2">
                         <svg className="w-5 h-5 text-red-600 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                         </svg>
-                        <p className="text-red-800 text-sm">{errors.general || errors.submit || error}</p>
+                        <p className="text-red-800 text-sm font-semibold">{errors.general || errors.submit || error}</p>
                       </div>
+                      {/* Spesifik hata mesajlarını göster */}
+                      {(errors.name || errors.surname || errors.tc || errors.birthDate || errors.phone || errors.email || 
+                        errors.parentName || errors.parentSurname || errors.parentPhone || errors.parentEmail || 
+                        errors.examDate || errors.kvkkConsent) && (
+                        <div className="mt-2 space-y-1 ml-7">
+                          {errors.name && <p className="text-red-700 text-xs">• {errors.name}</p>}
+                          {errors.surname && <p className="text-red-700 text-xs">• {errors.surname}</p>}
+                          {errors.tc && <p className="text-red-700 text-xs">• {errors.tc}</p>}
+                          {errors.birthDate && <p className="text-red-700 text-xs">• {errors.birthDate}</p>}
+                          {errors.phone && <p className="text-red-700 text-xs">• {errors.phone}</p>}
+                          {errors.email && <p className="text-red-700 text-xs">• {errors.email}</p>}
+                          {errors.parentName && <p className="text-red-700 text-xs">• {errors.parentName}</p>}
+                          {errors.parentSurname && <p className="text-red-700 text-xs">• {errors.parentSurname}</p>}
+                          {errors.parentPhone && <p className="text-red-700 text-xs">• {errors.parentPhone}</p>}
+                          {errors.parentEmail && <p className="text-red-700 text-xs">• {errors.parentEmail}</p>}
+                          {errors.school && <p className="text-red-700 text-xs">• {errors.school}</p>}
+                          {errors.grade && <p className="text-red-700 text-xs">• {errors.grade}</p>}
+                          {errors.examType && <p className="text-red-700 text-xs">• {errors.examType}</p>}
+                          {errors.examDate && <p className="text-red-700 text-xs">• {errors.examDate}</p>}
+                          {errors.kvkkConsent && <p className="text-red-700 text-xs">• {errors.kvkkConsent}</p>}
+                        </div>
+                      )}
                     </div>
                   )}
 

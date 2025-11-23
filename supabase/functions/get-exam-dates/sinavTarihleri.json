@@ -1,5 +1,6 @@
 {
     "hasNoExamDates": true,
+    "examDuration": 140,
     "examDates": [
         {
             "label": "20 Eylül 2025 - Cumartesi",

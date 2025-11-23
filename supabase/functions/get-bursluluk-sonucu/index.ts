@@ -155,7 +155,7 @@ serve(async (req) => {
       })
     }
 
-    // Doğum tarihi validasyonu
+    // Doğum tarihi validasyonu - DD.MM.YYYY formatında olmalı
     if (!requestData.dogum_tarihi || !requestData.dogum_tarihi.trim()) {
       return new Response(JSON.stringify({
         success: false,
@@ -165,11 +165,29 @@ serve(async (req) => {
         headers: corsHeaders
       })
     }
+    
+    // DD.MM.YYYY formatını kontrol et
+    const dateRegex = /^\d{2}\.\d{2}\.\d{4}$/
+    if (!dateRegex.test(requestData.dogum_tarihi.trim())) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: "Doğum tarihi GG.AA.YYYY formatında olmalıdır (örn: 18.01.1997)"
+      }), {
+        status: 400,
+        headers: corsHeaders
+      })
+    }
+    
+    // DD.MM.YYYY formatını DATE'e çevir (YYYY-MM-DD)
+    const [day, month, year] = requestData.dogum_tarihi.trim().split('.')
+    const postgresDate = `${year}-${month}-${day}`
+    
+    // TC kimlik no ve doğum tarihi ile sorgula
     const { data: resultData, error: queryError } = await supabase
       .from('bursluluk_sonucu')
       .select('*')
       .eq('tc_kimlik_no', requestData.tc_kimlik_no)
-      .eq('dogum_tarihi', requestData.dogum_tarihi)
+      .eq('dogum_tarihi', postgresDate)
       .single()
 
     if (queryError) {
@@ -195,13 +213,27 @@ serve(async (req) => {
         headers: corsHeaders
       })
     }
+    // dogum_tarihi DATE tipinde, DD.MM.YYYY formatına çevir
+    const formatDateToString = (date: Date | string): string => {
+      if (!date) return ''
+      let dateObj: Date
+      if (typeof date === 'string') {
+        dateObj = new Date(date)
+      } else {
+        dateObj = date
+      }
+      // Date objesinden DD.MM.YYYY formatına çevir
+      const year = dateObj.getFullYear()
+      const month = String(dateObj.getMonth() + 1).padStart(2, '0')
+      const day = String(dateObj.getDate()).padStart(2, '0')
+      return `${day}.${month}.${year}`
+    }
+    
     const foundResult = {
-      ad: resultData.ad,
-      soyad: resultData.soyad,
-      dogum_tarihi: resultData.dogum_tarihi,
-      telefon: resultData.telefon,
-      e_posta: resultData.e_posta,
-      bursluluk_puan_sonucu: resultData.bursluluk_puan_sonucu
+      ad_soyad: resultData.ad_soyad,
+      dogum_tarihi: formatDateToString(resultData.dogum_tarihi),
+      bursluluk_puan_sonucu: resultData.bursluluk_puan_sonucu,
+      aciklama: resultData.aciklama || null
     }
     
     // KVKK uyumlu form loglama (kişisel veri sorgulama)

@@ -541,67 +541,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Dijital Derslik Section */}
-      <section className="py-12 bg-gradient-to-r from-blue-600 via-blue-400 to-blue-200">
-        <div className="container mx-auto px-4">
-          <ScrollAnimation animation="slideUp">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-white mb-4">Dijital Derslik</h2>
-              <p className="text-xl text-blue-100 max-w-2xl mx-auto">
-                Teknolojinin gücüyle eğitimi her yere taşıyoruz
-              </p>
-            </div>
-          </ScrollAnimation>
-          
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <ScrollAnimation animation="slideLeft" delay={200}>
-              <div className="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow">
-                <div className="text-5xl mb-3">👨‍🎓</div>
-                <h3 className="text-xl font-bold text-blue-800 mb-4">Öğrenci Girişi</h3>
-                <a
-                  href="https://sistem.xysinav.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-block"
-                >
-                  Giriş Yap
-                </a>
-              </div>
-            </ScrollAnimation>
-            
-            <ScrollAnimation animation="slideUp" delay={400}>
-              <div className="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow">
-                <div className="text-5xl mb-3">👨‍👩‍👧‍👦</div>
-                <h3 className="text-xl font-bold text-blue-800 mb-4">Veli Girişi</h3>
-                <a
-                  href="https://sistem.xysinav.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-block"
-                >
-                  Giriş Yap
-                </a>
-              </div>
-            </ScrollAnimation>
-            
-            <ScrollAnimation animation="slideRight" delay={600}>
-              <div className="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow">
-                <div className="text-5xl mb-3">🏢</div>
-                <h3 className="text-xl font-bold text-blue-800 mb-4">Kurumsal Giriş</h3>
-                <a
-                  href="https://sistem.xysinav.com/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-block"
-                >
-                  Giriş Yap
-                </a>
-              </div>
-            </ScrollAnimation>
-          </div>
-        </div>
-      </section>
-
       {/* İletişim Section */}
       <section className="py-20 bg-gradient-to-br from-blue-50 to-indigo-100">
         <div className="container mx-auto px-4">

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useBurslulukSonucu } from '../hooks/useBurslulukSonucu'
 import ScrollAnimation from '../components/ScrollAnimation'
-import { validateTC, validateBirthDate } from '../utils/validation'
+import { validateTC } from '../utils/validation'
 
 export default function SinavSonucu() {
   const [tcKimlikNo, setTcKimlikNo] = useState('')
@@ -32,27 +32,6 @@ export default function SinavSonucu() {
       return
     }
 
-    if (!validateBirthDate(dogumTarihi)) {
-      // Yaş kontrolü hatası için özel mesaj
-      const selectedDate = new Date(dogumTarihi)
-      const today = new Date()
-      let age = today.getFullYear() - selectedDate.getFullYear()
-      const monthDiff = today.getMonth() - selectedDate.getMonth()
-      
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < selectedDate.getDate())) {
-        age--
-      }
-      
-      if (age < 13) {
-        setError('Doğum tarihi 13 yaşından küçük öğrenciler için uygun değildir')
-      } else if (age > 20) {
-        setError('Doğum tarihi 20 yaşından büyük öğrenciler için uygun değildir')
-      } else {
-        setError('Geçerli bir doğum tarihi giriniz')
-      }
-      return
-    }
-
     await getBurslulukSonucu(tcKimlikNo, dogumTarihi)
   }
 
@@ -76,7 +55,7 @@ export default function SinavSonucu() {
 
       {/* Form Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md mx-auto">
+        <div className="max-w-2xl mx-auto w-full">
           <ScrollAnimation animation="fadeIn" delay={600}>
             <div className="bg-white rounded-2xl shadow-xl p-8">
               <div className="text-center mb-8">
@@ -114,17 +93,17 @@ export default function SinavSonucu() {
               <ScrollAnimation animation="slideUp" delay={1000}>
                 <div>
                   <label htmlFor="dogumTarihi" className="block text-sm font-medium text-gray-700 mb-2">
-                    Doğum Tarihi *
+                    Doğum Tarihi * (GG.AA.YYYY)
                   </label>
                   <input
-                    type="date"
+                    type="text"
                     id="dogumTarihi"
                     value={dogumTarihi}
                     onChange={(e) => setDogumTarihi(e.target.value)}
                     required
-                    min="1900-01-01"
-                    max={new Date().toISOString().split('T')[0]}
-                    className="w-full px-3 py-2 sm:px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 date-input text-sm sm:text-base"
+                    placeholder="18.01.1997"
+                    maxLength={10}
+                    className="w-full px-3 py-2 sm:px-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-700 text-sm sm:text-base"
                     disabled={isLoading}
                   />
                 </div>
@@ -151,7 +130,7 @@ export default function SinavSonucu() {
 
             {sonuc && (
               <ScrollAnimation animation="slideUp" delay={200}>
-                <div className={`mt-8 rounded-lg p-6 ${
+                <div className={`mt-8 rounded-lg p-6 w-full ${
                   sonuc.bursluluk_puan_sonucu === '0' || sonuc.bursluluk_puan_sonucu === '0%' 
                     ? 'bg-orange-50 border border-orange-200' 
                     : 'bg-green-50 border border-green-200'
@@ -175,7 +154,7 @@ export default function SinavSonucu() {
                           : 'border-green-200'
                       }`}>
                         <span className="font-medium text-gray-700">Ad Soyad:</span>
-                        <span className="text-gray-900">{sonuc.ad} {sonuc.soyad}</span>
+                        <span className="text-gray-900">{sonuc.ad_soyad}</span>
                       </div>
                     </ScrollAnimation>
                     
@@ -191,7 +170,11 @@ export default function SinavSonucu() {
                     </ScrollAnimation>
                     
                     <ScrollAnimation animation="fadeIn" delay={800}>
-                      <div className="flex justify-between items-center py-2">
+                      <div className={`flex justify-between items-center py-2 ${sonuc.aciklama ? 'border-b' : ''} ${
+                        sonuc.bursluluk_puan_sonucu === '0' || sonuc.bursluluk_puan_sonucu === '0%'
+                          ? 'border-orange-200'
+                          : 'border-green-200'
+                      }`}>
                         <span className="font-medium text-gray-700">Bursluluk Puanı:</span>
                         <span className={`text-2xl font-bold ${
                           sonuc.bursluluk_puan_sonucu === '0' || sonuc.bursluluk_puan_sonucu === '0%'
@@ -202,6 +185,19 @@ export default function SinavSonucu() {
                         </span>
                       </div>
                     </ScrollAnimation>
+                    
+                    {sonuc.aciklama && (
+                      <ScrollAnimation animation="fadeIn" delay={1000}>
+                        <div className="py-2">
+                          <div className="flex flex-col sm:flex-row sm:items-start gap-2">
+                            <span className="font-medium text-gray-700 flex-shrink-0 sm:w-24">Açıklama:</span>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-gray-900 text-sm break-words whitespace-pre-wrap" style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>{sonuc.aciklama}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </ScrollAnimation>
+                    )}
                   </div>
                   
                 </div>

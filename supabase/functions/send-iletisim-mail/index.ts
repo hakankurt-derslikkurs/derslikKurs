@@ -243,19 +243,30 @@ serve(async (req) => {
     // Resend API Key kontrolü
     const resendApiKey = Deno.env.get("RESEND_API_KEY")
     if (!resendApiKey) {
-      // RESEND_API_KEY environment variable is not set
+      return new Response(JSON.stringify({
+        success: false,
+        error: "Resend API key bulunamadı"
+      }), {
+        status: 500,
+        headers: corsHeaders
+      })
     }
 
     const resend = new Resend(resendApiKey)
     
-    // Email domain kontrolü - Resend testing mode için
-    // Resend testing mode'da sadece hesap sahibinin email'ine gönderim yapılabilir
-    const fromEmail = "onboarding@resend.dev" // Resend'in default domain'i
-    const toEmail = "recaicelik97@gmail.com" // Resend hesap sahibinin email'i (testing mode)
+    // Email domain kontrolü
+    // TEST MODU: "onboarding@resend.dev" - Sadece kendi email adresinize mail gönderebilirsiniz
+    // PRODUCTION: Domain verify edildikten sonra "noreply@derslikkurs.com" gibi bir adres kullanın
+    const fromEmail = Deno.env.get("RESEND_FROM_EMAIL") || "onboarding@resend.dev"
+    const adminEmail = "hakankurt@derslikkurs.com" // Admin email
+    
+    // Debug: fromEmail değerini kontrol et
+    console.log('🔍 DEBUG: RESEND_FROM_EMAIL env var:', Deno.env.get("RESEND_FROM_EMAIL"))
+    console.log('🔍 DEBUG: Final fromEmail value:', fromEmail)
   
     const { data, error } = await resend.emails.send({
       from: fromEmail,
-      to: [toEmail],
+      to: [adminEmail],
       subject: `İletişim Formu - ${requestData.ad} ${requestData.soyad}`,
       html: `
         <!DOCTYPE html>
@@ -265,94 +276,167 @@ serve(async (req) => {
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>İletişim Formu</title>
         </head>
-        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f1f5f9; line-height: 1.6;">
-            <div style="max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 16px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); overflow: hidden;">
-                <!-- Header -->
-                <div style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); padding: 40px 30px; text-align: center; position: relative;">
-                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #0ea5e9, #0284c7, #0ea5e9);"></div>
-                    <div style="display: inline-block; background-color: rgba(255, 255, 255, 0.15); padding: 20px; border-radius: 50%; margin-bottom: 20px; backdrop-filter: blur(10px);">
-                        <div style="color: white; font-size: 32px;">💬</div>
-                    </div>
-                    <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">Yeni Mesaj Geldi!</h1>
-                    <p style="color: rgba(255, 255, 255, 0.9); margin: 12px 0 0 0; font-size: 16px; font-weight: 500;">Derslik Kurs - Seninle Aynı Frekansta</p>
-                </div>
-                
-                <!-- Content -->
-                <div style="padding: 40px 30px;">
-                    <!-- Contact Info Card -->
-                    <div style="background-color: #f8fafc; border-radius: 12px; padding: 25px; margin-bottom: 25px; border: 1px solid #e2e8f0;">
-                        <div style="background-color: #0ea5e9; color: white; padding: 12px 20px; border-radius: 8px 8px 0 0; margin: -25px -25px 20px -25px; font-size: 16px; font-weight: 600; display: flex; align-items: center;">
-                            <span style="margin-right: 8px;">👤</span>
-                            İletişim Bilgileri
-                        </div>
-                        
-                        <div style="display: flex; flex-direction: column; gap: 15px;">
-                            <div style="background-color: white; padding: 20px; border-radius: 8px; border-left: 4px solid #0ea5e9;">
-                                <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                                    <span style="background-color: #0ea5e9; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; margin-right: 12px;">AD</span>
-                                    <span style="color: #1e293b; font-weight: 600; font-size: 16px;">${requestData.ad}</span>
-                                </div>
-                                <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                                    <span style="background-color: #0ea5e9; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; margin-right: 12px;">SOYAD</span>
-                                    <span style="color: #1e293b; font-weight: 600; font-size: 16px;">${requestData.soyad}</span>
-                                </div>
-                                <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                                    <span style="background-color: #0ea5e9; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; margin-right: 12px;">📧</span>
-                                    <a href="mailto:${requestData.email}" style="color: #1e293b; font-weight: 600; font-size: 16px; text-decoration: none;">${requestData.email}</a>
-                                </div>
-                                <div style="display: flex; align-items: center;">
-                                    <span style="background-color: #0ea5e9; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; margin-right: 12px;">📱</span>
-                                    <a href="tel:${requestData.telefon}" style="color: #1e293b; font-weight: 600; font-size: 16px; text-decoration: none;">${requestData.telefon || 'Belirtilmemiş'}</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Message Section -->
-                    <div style="margin-bottom: 25px;">
-                        <div style="background-color: #f8fafc; border-radius: 12px; padding: 25px; border: 1px solid #e2e8f0;">
-                            <div style="background-color: #0ea5e9; color: white; padding: 12px 20px; border-radius: 8px 8px 0 0; margin: -25px -25px 20px -25px; font-size: 16px; font-weight: 600; display: flex; align-items: center;">
-                                <span style="margin-right: 8px;">💭</span>
-                                Mesaj İçeriği
-                            </div>
-                            <div style="background-color: white; padding: 20px; border-radius: 8px; border-left: 4px solid #0ea5e9; min-height: 80px;">
-                                <p style="color: #1e293b; margin: 0; font-size: 16px; line-height: 1.6; white-space: pre-wrap; font-weight: 500;">${requestData.mesaj.replace(/\n/g, '\n')}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Footer -->
-                <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 30px; text-align: center; border-top: 1px solid #e2e8f0;">
-                    <div style="background-color: white; border-radius: 12px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
-                        <p style="color: #0c4a6e; margin: 0 0 12px 0; font-size: 18px; font-weight: 700;">
-                            🎓 Derslik Kurs
-                        </p>
-                        <p style="color: #64748b; margin: 0 0 8px 0; font-size: 14px; font-weight: 500;">
-                            Seninle Aynı Frekansta
-                        </p>
-                        <div style="display: flex; justify-content: center; gap: 20px; margin-top: 15px;">
-                            <div style="display: flex; align-items: center; color: #64748b; font-size: 14px;">
-                                <span style="margin-right: 6px;">📍</span>
-                                Caferağa Mahallesi, General Asım Gündüz Caddesi, Bahariye Plaza No: 62 Kat: 1-2
-                            </div>
-                            <div style="display: flex; align-items: center; color: #64748b; font-size: 14px;">
-                                <span style="margin-right: 6px;">📞</span>
-                                +90 533 054 75 45
-                            </div>
-                        </div>
-                    </div>
-                    <p style="color: #94a3b8; margin: 0 0 8px 0; font-size: 12px;">
-                        Bu mesaj <a href="https://derslikkurs.com" style="color: #0ea5e9; text-decoration: none; font-weight: 600;">derslikkurs.com</a> web sitesindeki iletişim formundan gönderilmiştir.
-                    </p>
-                    <p style="color: #94a3b8; margin: 0 0 8px 0; font-size: 12px; font-weight: 500;">
-                        ✅ KVKK Aydınlatma Metni onaylanarak gönderilmiştir.
-                    </p>
-                    <p style="color: #94a3b8; margin: 0; font-size: 12px;">
-                        📅 Gönderim Zamanı: ${new Date().toLocaleString('tr-TR')}
-                    </p>
-                </div>
-            </div>
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); line-height: 1.6;">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px;">
+                <tr>
+                    <td align="center">
+                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width: 600px; background-color: #ffffff; border-radius: 20px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); overflow: hidden;">
+                            <!-- Header -->
+                            <tr>
+                                <td style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); padding: 50px 40px; text-align: center; position: relative;">
+                                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 5px; background: linear-gradient(90deg, #0ea5e9, #0284c7, #0ea5e9);"></div>
+                                    <div style="display: inline-block; background: rgba(255, 255, 255, 0.2); padding: 25px; border-radius: 50%; margin-bottom: 25px; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);">
+                                        <div style="color: white; font-size: 40px; line-height: 1;">💬</div>
+                                    </div>
+                                    <h1 style="color: white; margin: 0 0 10px 0; font-size: 32px; font-weight: 800; letter-spacing: -1px; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);">Yeni Mesaj Geldi!</h1>
+                                    <p style="color: rgba(255, 255, 255, 0.95); margin: 0; font-size: 18px; font-weight: 500; letter-spacing: 0.5px;">Derslik Kurs - İletişim Formu</p>
+                                </td>
+                            </tr>
+                            
+                            <!-- Content -->
+                            <tr>
+                                <td style="padding: 45px 40px;">
+                                    <!-- İletişim Bilgileri -->
+                                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 30px;">
+                                        <tr>
+                                            <td style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 16px; padding: 30px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);">
+                                                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                                    <tr>
+                                                        <td style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); padding: 16px 24px; border-radius: 12px 12px 0 0; margin: -30px -30px 25px -30px;">
+                                                            <p style="color: white; margin: 0; font-size: 17px; font-weight: 700; letter-spacing: 0.3px;">
+                                                                <span style="font-size: 20px; margin-right: 10px;">👤</span>
+                                                                İletişim Bilgileri
+                                                            </p>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="background-color: white; padding: 25px; border-radius: 12px; border-left: 5px solid #0ea5e9;">
+                                                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                                                <tr>
+                                                                    <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9;">
+                                                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                                                            <tr>
+                                                                                <td style="color: #64748b; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; padding-bottom: 5px;">Ad</td>
+                                                                                <td align="right" style="color: #1e293b; font-weight: 700; font-size: 16px;">${requestData.ad}</td>
+                                                                            </tr>
+                                                                        </table>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9;">
+                                                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                                                            <tr>
+                                                                                <td style="color: #64748b; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; padding-bottom: 5px;">Soyad</td>
+                                                                                <td align="right" style="color: #1e293b; font-weight: 700; font-size: 16px;">${requestData.soyad}</td>
+                                                                            </tr>
+                                                                        </table>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="padding: 12px 0; border-bottom: 1px solid #f1f5f9;">
+                                                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                                                            <tr>
+                                                                                <td style="color: #64748b; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; padding-bottom: 5px;">📧 E-Posta</td>
+                                                                                <td align="right" style="color: #1e293b; font-weight: 700; font-size: 16px;">
+                                                                                    <a href="mailto:${requestData.email}" style="color: #0ea5e9; text-decoration: none; font-weight: 700;">${requestData.email}</a>
+                                                                                </td>
+                                                                            </tr>
+                                                                        </table>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td style="padding: 12px 0;">
+                                                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                                                            <tr>
+                                                                                <td style="color: #64748b; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; padding-bottom: 5px;">📱 Telefon</td>
+                                                                                <td align="right" style="color: #1e293b; font-weight: 700; font-size: 16px;">
+                                                                                    <a href="tel:${requestData.telefon}" style="color: #0ea5e9; text-decoration: none; font-weight: 700;">${requestData.telefon || 'Belirtilmemiş'}</a>
+                                                                                </td>
+                                                                            </tr>
+                                                                        </table>
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    
+                                    <!-- Mesaj İçeriği -->
+                                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                        <tr>
+                                            <td style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 16px; padding: 30px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);">
+                                                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                                    <tr>
+                                                        <td style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); padding: 16px 24px; border-radius: 12px 12px 0 0; margin: -30px -30px 25px -30px;">
+                                                            <p style="color: white; margin: 0; font-size: 17px; font-weight: 700; letter-spacing: 0.3px;">
+                                                                <span style="font-size: 20px; margin-right: 10px;">💭</span>
+                                                                Mesaj İçeriği
+                                                            </p>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="background-color: white; padding: 25px; border-radius: 12px; border-left: 5px solid #0ea5e9;">
+                                                            <p style="color: #1e293b; margin: 0; font-size: 16px; line-height: 1.8; white-space: pre-wrap; font-weight: 500;">${requestData.mesaj.replace(/\n/g, '\n')}</p>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            
+                            <!-- Footer -->
+                            <tr>
+                                <td style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 40px; text-align: center; border-top: 1px solid #e2e8f0;">
+                                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                        <tr>
+                                            <td style="background-color: white; border-radius: 16px; padding: 35px; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);">
+                                                <p style="color: #0c4a6e; margin: 0 0 15px 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">
+                                                    🎓 Derslik Kurs
+                                                </p>
+                                                <p style="color: #64748b; margin: 0 0 25px 0; font-size: 15px; font-weight: 500; letter-spacing: 0.3px;">
+                                                    Seninle Aynı Frekansta
+                                                </p>
+                                                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                                    <tr>
+                                                        <td align="center" style="padding: 15px 0; border-top: 1px solid #f1f5f9;">
+                                                            <p style="color: #64748b; margin: 0 0 10px 0; font-size: 14px; line-height: 1.8;">
+                                                                <span style="font-size: 16px; margin-right: 8px;">📍</span>
+                                                                Caferağa Mahallesi, General Asım Gündüz Caddesi,<br>Bahariye Plaza No: 62 Kat: 1-2
+                                                            </p>
+                                                            <p style="color: #64748b; margin: 0; font-size: 14px;">
+                                                                <span style="font-size: 16px; margin-right: 8px;">📞</span>
+                                                                +90 533 054 75 45
+                                                            </p>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding-top: 20px;">
+                                                <p style="color: #94a3b8; margin: 0 0 8px 0; font-size: 12px; line-height: 1.6;">
+                                                    Bu mesaj <a href="https://derslikkurs.com" style="color: #0ea5e9; text-decoration: none; font-weight: 600;">derslikkurs.com</a> web sitesindeki iletişim formundan gönderilmiştir.
+                                                </p>
+                                                <p style="color: #94a3b8; margin: 0 0 8px 0; font-size: 12px; font-weight: 500;">
+                                                    ✅ KVKK Aydınlatma Metni onaylanarak gönderilmiştir.
+                                                </p>
+                                                <p style="color: #94a3b8; margin: 0; font-size: 12px;">
+                                                    📅 Gönderim Zamanı: ${new Date().toLocaleString('tr-TR')}
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
         </body>
         </html>
       `,
@@ -401,8 +485,6 @@ serve(async (req) => {
       success: true,
       message: "Mesajınız başarıyla gönderildi. En kısa sürede size dönüş yapacağız.",
       emailId: data?.id,
-      testingMode: true,
-      note: "Email testing mode'da gönderilmiştir.",
       timestamp: new Date().toISOString()
     }), {
       status: 200,

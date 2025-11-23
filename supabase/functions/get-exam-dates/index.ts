@@ -123,15 +123,22 @@ serve(async (req) => {
       .download("sinavTarihleri.json")
 
     if (error || !fileData) {
+      console.error('sinavTarihleri.json bulunamadı:', error)
       // sinavTarihleri.json bulunamadı
     }
 
     const text = await fileData.text()
-    let parsed: { examDates?: ExamDate[], hasNoExamDates?: boolean }
+    console.log('sinavTarihleri.json içeriği:', text.substring(0, 200)) // İlk 200 karakter
+    
+    let parsed: { examDates?: ExamDate[], hasNoExamDates?: boolean, examDuration?: number } = {}
     try {
       parsed = JSON.parse(text)
+      console.log('Parsed examDuration:', parsed.examDuration)
+      console.log('Parsed examDates:', parsed.examDates?.length || 0, 'adet')
     } catch (e) {
+      console.error('sinavTarihleri.json parse edilemedi:', e)
       // sinavTarihleri.json parse edilemedi
+      parsed = {} // Hata durumunda boş object
     }
 
     // ✅ Eğer sınav yoksa yine boş array dön
@@ -139,15 +146,22 @@ serve(async (req) => {
       // Sınav tarihleri geçersiz formatta
     }
 
+    // Sınav süresi - yoksa default 120 dakika
+    const examDuration = parsed.examDuration || 120
+    console.log('Final examDuration:', examDuration)
+
     // Site erişim loglama kaldırıldı - gereksiz veri toplama
 
-    return new Response(JSON.stringify({
+    const responseData = {
       success: true,
       data: parsed.examDates || [],
       count: parsed.examDates?.length || 0,
       hasNoExamDates: parsed.hasNoExamDates,
+      examDuration: examDuration,
       timestamp: new Date().toISOString()
-    }), {
+    }
+
+    return new Response(JSON.stringify(responseData), {
       headers: { ...headers, 'Cache-Control': 'public, max-age=300' }
     })
 

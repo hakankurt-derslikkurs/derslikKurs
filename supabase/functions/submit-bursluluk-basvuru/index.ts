@@ -116,20 +116,27 @@ function validateTC(tc: string): boolean {
 }
 
 function validateBirthDate(birthDate: string): boolean {
+  // DD.MM.YYYY formatını kontrol et, yaş kontrolü yok
   if (!birthDate || typeof birthDate !== 'string') return false
-  const selectedDate = new Date(birthDate)
-  const today = new Date()
+  const trimmed = birthDate.trim()
+  // DD.MM.YYYY formatını kontrol et
+  const dateRegex = /^\d{2}\.\d{2}\.\d{4}$/
+  if (!dateRegex.test(trimmed)) return false
+  // Geçerli bir tarih olup olmadığını kontrol et
+  const [day, month, year] = trimmed.split('.')
+  const selectedDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day))
   if (isNaN(selectedDate.getTime())) return false
-  if (selectedDate > today) return false
-  const minDate = new Date('1900-01-01')
-  if (selectedDate < minDate) return false
-  let age = today.getFullYear() - selectedDate.getFullYear()
-  const monthDiff = today.getMonth() - selectedDate.getMonth()
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < selectedDate.getDate())) {
-    age--
-  }
-  if (age < 13 || age > 20) return false
+  // Tarihin geçerli olup olmadığını kontrol et (gün, ay, yıl eşleşmeli)
+  if (selectedDate.getDate() !== parseInt(day) || 
+      selectedDate.getMonth() !== parseInt(month) - 1 || 
+      selectedDate.getFullYear() !== parseInt(year)) return false
   return true
+}
+
+// DD.MM.YYYY formatını DATE'e çevir
+function convertDateToPostgres(dateString: string): string {
+  const [day, month, year] = dateString.trim().split('.')
+  return `${year}-${month}-${day}`
 }
 
 // ✅ Supabase client (Service Role Key ile)
@@ -254,10 +261,10 @@ serve(async (req) => {
     }
 
     if (!validateBirthDate(requestData.birthDate)) {
-      await logValidationError("Geçerli bir doğum tarihi giriniz (13-20 yaş arası)")
+      await logValidationError("Geçerli bir doğum tarihi giriniz")
       return new Response(JSON.stringify({
         success: false,
-        error: "Geçerli bir doğum tarihi giriniz (13-20 yaş arası)"
+        error: "Geçerli bir doğum tarihi giriniz"
       }), {
         status: 400,
         headers: corsHeaders
@@ -411,7 +418,7 @@ serve(async (req) => {
     if (existingApplications && existingApplications.length > 0) {
       return new Response(JSON.stringify({
         success: false,
-        error: "Bu TC Kimlik No ile daha önce başvuru yapılmış"
+        error: "Bu TC ile başvuru zaten var"
       }), {
         status: 409,
         headers: corsHeaders
@@ -424,7 +431,7 @@ serve(async (req) => {
         name: requestData.name,
         surname: requestData.surname,
         tc_kimlik_no: requestData.tc,
-        birth_date: requestData.birthDate,
+        birth_date: convertDateToPostgres(requestData.birthDate),
         phone: requestData.phone,
         email: requestData.email,
         // Okul ve Sınav Bilgileri
@@ -446,7 +453,26 @@ serve(async (req) => {
       .select()
 
     if (error) {
-      // Veritabanı hatası
+      // Duplicate key hatası kontrolü (PostgreSQL 23505 = unique_violation)
+      if (error.code === '23505' || error.message?.includes('duplicate') || error.message?.includes('unique') || error.message?.includes('already exists')) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: "Bu TC ile başvuru zaten var"
+        }), {
+          status: 409,
+          headers: corsHeaders
+        })
+      }
+      
+      // Diğer veritabanı hataları
+      await logValidationError(`Veritabanı hatası: ${error.message}`)
+      return new Response(JSON.stringify({
+        success: false,
+        error: "Başvuru gönderilirken bir hata oluştu. Lütfen daha sonra tekrar deneyiniz."
+      }), {
+        status: 500,
+        headers: corsHeaders
+      })
     }
     
     // KVKK uyumlu form loglama

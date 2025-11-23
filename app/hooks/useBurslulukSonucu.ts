@@ -1,12 +1,12 @@
 import { useState, useCallback } from 'react'
 import { edgeFunctions } from '@/app/utils/supabase-edge'
-import { validateTC, validateBirthDate } from '@/app/utils/validation'
+import { validateTC } from '@/app/utils/validation'
 
 interface BurslulukSonucu {
-  ad: string
-  soyad: string
+  ad_soyad: string
   dogum_tarihi: string
   bursluluk_puan_sonucu: string
+  aciklama?: string | null
 }
 
 interface BurslulukSonucuResponse {
@@ -33,19 +33,16 @@ export function useBurslulukSonucu() {
         return null
       }
       
-      if (!validateBirthDate(dogum_tarihi)) {
-        setError('Geçerli bir doğum tarihi giriniz (DD/MM/YYYY)')
+      if (!dogum_tarihi || !dogum_tarihi.trim()) {
+        setError('Doğum tarihi gereklidir')
         return null
       }
       
-      // Tarihi YYYY-MM-DD formatından DD.MM.YYYY formatına çevir
+      // Tarihi DD.MM.YYYY formatında gönder
       const formatDateForAPI = (dateString: string) => {
         if (!dateString) return ''
-        const date = new Date(dateString)
-        const day = String(date.getDate()).padStart(2, '0')
-        const month = String(date.getMonth() + 1).padStart(2, '0')
-        const year = date.getFullYear()
-        return `${day}.${month}.${year}`
+        // Zaten DD.MM.YYYY formatında olmalı
+        return dateString.trim()
       }
 
       const result: BurslulukSonucuResponse = await edgeFunctions.getBurslulukSonucu({ 
@@ -64,10 +61,6 @@ export function useBurslulukSonucu() {
           errorMessage = 'Bu T.C. Kimlik No ve doğum tarihi ile sonuç bulunamadı'
         } else if (result.error === 'INVALID_TC_FORMAT') {
           errorMessage = 'T.C. Kimlik No 11 haneli sayı olmalıdır'
-        } else if (result.error === 'DOGUM_TARIHI_REQUIRED') {
-          errorMessage = 'Doğum tarihi gereklidir'
-        } else if (result.error === 'INVALID_DATE_FORMAT') {
-          errorMessage = 'Doğum tarihi DD-MM-YYYY formatında olmalıdır (örn: 15-03-2005)'
         } else if (result.message) {
           errorMessage = result.message
         }
