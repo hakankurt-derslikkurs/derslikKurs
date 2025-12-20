@@ -313,8 +313,7 @@ export default function SimulasyonSinaviBasvuru() {
           </ScrollAnimation>
           <ScrollAnimation animation="slideUp" delay={400}>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              2028 Simülasyon Sınavı'na katılarak kendinizi test edebilirsiniz. 
-              Başvuru formunu doldurarak sınav tarihini öğrenebilirsiniz.
+              2028 Simülasyon Sınavı'na ücretsiz katılarak kendinizi test edebilirsiniz.
             </p>
           </ScrollAnimation>
         </div>
