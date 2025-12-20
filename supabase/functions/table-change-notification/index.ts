@@ -155,7 +155,7 @@ serve(async (req) => {
     }
 
     // Sadece belirli tablolar için bildirim gönder
-    if (!['bursluluk_basvuru', 'tanisma_dersi_basvuru'].includes(requestData.table_name)) {
+    if (!['bursluluk_basvuru', 'tanisma_dersi_basvuru', 'simulasyon_sinavi_basvuru'].includes(requestData.table_name)) {
       return new Response(JSON.stringify({
         success: false,
         error: "Bu tablo için bildirim gönderilmiyor"
@@ -391,6 +391,175 @@ serve(async (req) => {
           </tr>
         </table>
       `
+    } else if (requestData.table_name === 'simulasyon_sinavi_basvuru') {
+      tableDisplayName = "Simülasyon Sınavı Başvuru"
+      const record = requestData.record_data
+      
+      // Sınav türü Türkçe çevirisi
+      const examTypeText = record.exam_type === 'online' ? 'Online' : record.exam_type === 'yuzYuze' ? 'Yüz Yüze' : record.exam_type || 'N/A'
+      
+      recordInfo = `
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: white; border-radius: 12px; border-left: 5px solid #3b82f6; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
+          <tr>
+            <td style="padding: 25px;">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="padding: 15px 0; border-bottom: 1px solid #f1f5f9;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; width: 120px;">T.C. KİMLİK</td>
+                        <td style="padding-left: 15px; color: #1e293b; font-weight: 700; font-size: 16px;">${record.tc_kimlik_no || 'N/A'}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 15px 0; border-bottom: 1px solid #f1f5f9;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; width: 120px;">AD</td>
+                        <td style="padding-left: 15px; color: #1e293b; font-weight: 700; font-size: 16px;">${record.name || 'N/A'}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 15px 0; border-bottom: 1px solid #f1f5f9;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; width: 120px;">SOYAD</td>
+                        <td style="padding-left: 15px; color: #1e293b; font-weight: 700; font-size: 16px;">${record.surname || 'N/A'}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 15px 0; border-bottom: 1px solid #f1f5f9;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; width: 120px;">📧 E-POSTA</td>
+                        <td style="padding-left: 15px; color: #1e293b; font-weight: 700; font-size: 16px;">${record.email || 'N/A'}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 15px 0; border-bottom: 1px solid #f1f5f9;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; width: 120px;">📱 TELEFON</td>
+                        <td style="padding-left: 15px; color: #1e293b; font-weight: 700; font-size: 16px;">${record.phone || 'N/A'}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 15px 0; border-bottom: 1px solid #f1f5f9;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; width: 120px;">🏫 OKUL</td>
+                        <td style="padding-left: 15px; color: #1e293b; font-weight: 700; font-size: 16px;">${record.school || 'N/A'}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 15px 0; border-bottom: 1px solid #f1f5f9;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; width: 120px;">📚 SINIF</td>
+                        <td style="padding-left: 15px; color: #1e293b; font-weight: 700; font-size: 16px;">${record.grade || 'N/A'}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 15px 0; border-bottom: 1px solid #f1f5f9;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; width: 120px;">📍 İL</td>
+                        <td style="padding-left: 15px; color: #1e293b; font-weight: 700; font-size: 16px;">${record.province || 'N/A'}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 15px 0; border-bottom: 1px solid #f1f5f9;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; width: 120px;">💻 SINAV TÜRÜ</td>
+                        <td style="padding-left: 15px; color: #1e293b; font-weight: 700; font-size: 16px;">${examTypeText}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 15px 0; border-bottom: 1px solid #f1f5f9;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; width: 120px;">📅 SINAV TARİHİ</td>
+                        <td style="padding-left: 15px; color: #1e293b; font-weight: 700; font-size: 16px;">${record.exam_date || 'N/A'}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                ${record.address ? `
+                <tr>
+                  <td style="padding: 15px 0; border-bottom: 1px solid #f1f5f9;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; width: 120px; vertical-align: top;">📍 ADRES</td>
+                        <td style="padding-left: 15px; color: #1e293b; font-weight: 500; font-size: 15px; line-height: 1.6; white-space: pre-wrap;">${record.address}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                ` : ''}
+                <tr>
+                  <td style="padding: 15px 0; border-bottom: 1px solid #f1f5f9;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; width: 120px;">👨‍👩‍👧‍👦 VELİ AD</td>
+                        <td style="padding-left: 15px; color: #1e293b; font-weight: 700; font-size: 16px;">${record.parent_name || 'N/A'}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 15px 0; border-bottom: 1px solid #f1f5f9;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; width: 120px;">👨‍👩‍👧‍👦 VELİ SOYAD</td>
+                        <td style="padding-left: 15px; color: #1e293b; font-weight: 700; font-size: 16px;">${record.parent_surname || 'N/A'}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 15px 0; border-bottom: 1px solid #f1f5f9;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; width: 120px;">📧 VELİ E-POSTA</td>
+                        <td style="padding-left: 15px; color: #1e293b; font-weight: 700; font-size: 16px;">${record.parent_email || 'N/A'}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding: 15px 0;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; width: 120px;">📱 VELİ TELEFON</td>
+                        <td style="padding-left: 15px; color: #1e293b; font-weight: 700; font-size: 16px;">${record.parent_phone || 'N/A'}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      `
     }
 
     // İşlem türüne göre başlık oluştur
@@ -435,6 +604,8 @@ serve(async (req) => {
     if (requestData.table_name === 'bursluluk_basvuru') {
       applicantEmail = requestData.record_data?.email || ""
     } else if (requestData.table_name === 'tanisma_dersi_basvuru') {
+      applicantEmail = requestData.record_data?.email || ""
+    } else if (requestData.table_name === 'simulasyon_sinavi_basvuru') {
       applicantEmail = requestData.record_data?.email || ""
     }
     // 1. ADMIN'E BİLDİRİM MAİLİ
@@ -917,6 +1088,252 @@ serve(async (req) => {
                         </table>
                         <p style="color: #475569; font-size: 16px; line-height: 1.8; margin: 25px 0 0 0;">
                           Sorularınız için bizimle iletişime geçebilirsiniz.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          `
+        } else if (requestData.table_name === 'simulasyon_sinavi_basvuru') {
+          applicantSubject = "2028 Simülasyon Sınavı Başvurunuz Alındı - Derslik Kurs"
+          applicantName = `${requestData.record_data?.name || ''} ${requestData.record_data?.surname || ''}`.trim()
+          const record = requestData.record_data
+          
+          // Doğum tarihini formatla (YYYY-MM-DD -> DD.MM.YYYY)
+          const formatBirthDate = (dateStr: string | Date | null | undefined) => {
+            if (!dateStr) return 'N/A'
+            try {
+              let date: Date
+              if (dateStr instanceof Date) {
+                date = dateStr
+              } else if (typeof dateStr === 'string') {
+                date = new Date(dateStr)
+                if (isNaN(date.getTime())) {
+                  return 'N/A'
+                }
+              } else {
+                return 'N/A'
+              }
+              
+              const day = String(date.getDate()).padStart(2, '0')
+              const month = String(date.getMonth() + 1).padStart(2, '0')
+              const year = date.getFullYear()
+              return `${day}.${month}.${year}`
+            } catch {
+              return 'N/A'
+            }
+          }
+          
+          // Sınav türü Türkçe çevirisi
+          const examTypeText = record?.exam_type === 'online' ? 'Online' : record?.exam_type === 'yuzYuze' ? 'Yüz Yüze' : record?.exam_type || 'N/A'
+          
+          applicantContent = `
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 16px; padding: 30px; border: 1px solid #7dd3fc; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);">
+              <tr>
+                <td>
+                  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                      <td style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 18px 24px; border-radius: 12px 12px 0 0; margin: -30px -30px 25px -30px;">
+                        <p style="color: white; margin: 0; font-size: 18px; font-weight: 700; letter-spacing: 0.3px;">
+                          <span style="font-size: 24px; margin-right: 10px;">✅</span>
+                          Başvurunuz Başarıyla Alındı
+                        </p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="background-color: white; padding: 30px; border-radius: 12px; border-left: 5px solid #3b82f6;">
+                        <p style="color: #1e293b; font-size: 18px; line-height: 1.8; margin: 0 0 20px 0; font-weight: 600;">
+                          Merhaba <strong style="color: #1e40af;">${applicantName || 'Değerli Öğrencimiz'}</strong>,
+                        </p>
+                        <p style="color: #475569; font-size: 16px; line-height: 1.8; margin: 0 0 25px 0;">
+                          2028 Simülasyon Sınavı başvurunuz başarıyla alınmıştır. Başvuru bilgileriniz aşağıda özetlenmiştir:
+                        </p>
+                        
+                        <!-- Öğrenci Bilgileri -->
+                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
+                          <tr>
+                            <td style="padding-bottom: 15px; border-bottom: 2px solid #3b82f6; margin-bottom: 15px;">
+                              <p style="color: #1e40af; margin: 0; font-size: 16px; font-weight: 700; letter-spacing: 0.3px;">
+                                👤 Öğrenci Bilgileri
+                              </p>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 10px 0; border-bottom: 1px solid #e2e8f0;">
+                              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                  <td style="color: #64748b; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; padding-bottom: 5px;">Ad Soyad</td>
+                                  <td align="right" style="color: #1e293b; font-weight: 700; font-size: 16px;">${record?.name || ''} ${record?.surname || ''}</td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 10px 0; border-bottom: 1px solid #e2e8f0;">
+                              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                  <td style="color: #64748b; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; padding-bottom: 5px;">T.C. Kimlik No</td>
+                                  <td align="right" style="color: #1e293b; font-weight: 700; font-size: 16px;">${record?.tc_kimlik_no || 'N/A'}</td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 10px 0; border-bottom: 1px solid #e2e8f0;">
+                              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                  <td style="color: #64748b; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; padding-bottom: 5px;">Doğum Tarihi</td>
+                                  <td align="right" style="color: #1e293b; font-weight: 700; font-size: 16px;">${formatBirthDate(record?.birth_date || '')}</td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 10px 0; border-bottom: 1px solid #e2e8f0;">
+                              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                  <td style="color: #64748b; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; padding-bottom: 5px;">📧 E-Posta</td>
+                                  <td align="right" style="color: #1e293b; font-weight: 700; font-size: 16px;">${record?.email || 'N/A'}</td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 10px 0;">
+                              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                  <td style="color: #64748b; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; padding-bottom: 5px;">📱 Telefon</td>
+                                  <td align="right" style="color: #1e293b; font-weight: 700; font-size: 16px;">${record?.phone || 'N/A'}</td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                        </table>
+                        
+                        <!-- Okul ve Sınav Bilgileri -->
+                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
+                          <tr>
+                            <td style="padding-bottom: 15px; border-bottom: 2px solid #3b82f6; margin-bottom: 15px;">
+                              <p style="color: #1e40af; margin: 0; font-size: 16px; font-weight: 700; letter-spacing: 0.3px;">
+                                🎓 Okul ve Sınav Bilgileri
+                              </p>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 10px 0; border-bottom: 1px solid #e2e8f0;">
+                              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                  <td style="color: #64748b; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; padding-bottom: 5px;">🏫 Okul</td>
+                                  <td align="right" style="color: #1e293b; font-weight: 700; font-size: 16px;">${record?.school || 'N/A'}</td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 10px 0; border-bottom: 1px solid #e2e8f0;">
+                              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                  <td style="color: #64748b; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; padding-bottom: 5px;">📚 Sınıf</td>
+                                  <td align="right" style="color: #1e293b; font-weight: 700; font-size: 16px;">${record?.grade || 'N/A'}</td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 10px 0; border-bottom: 1px solid #e2e8f0;">
+                              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                  <td style="color: #64748b; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; padding-bottom: 5px;">📍 İl</td>
+                                  <td align="right" style="color: #1e293b; font-weight: 700; font-size: 16px;">${record?.province || 'N/A'}</td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 10px 0; border-bottom: 1px solid #e2e8f0;">
+                              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                  <td style="color: #64748b; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; padding-bottom: 5px;">💻 Sınav Türü</td>
+                                  <td align="right" style="color: #1e293b; font-weight: 700; font-size: 16px;">${examTypeText}</td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 10px 0;">
+                              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                  <td style="color: #64748b; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; padding-bottom: 5px;">📅 Sınav Tarihi</td>
+                                  <td align="right" style="color: #1e293b; font-weight: 700; font-size: 16px;">${record?.exam_date || 'Belirlenecek'}</td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                        </table>
+                        
+                        ${record?.address ? `
+                        <!-- Adres Bilgisi -->
+                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
+                          <tr>
+                            <td style="padding-bottom: 15px; border-bottom: 2px solid #3b82f6; margin-bottom: 15px;">
+                              <p style="color: #1e40af; margin: 0; font-size: 16px; font-weight: 700; letter-spacing: 0.3px;">
+                                📍 Adres Bilgisi
+                              </p>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 10px 0;">
+                              <p style="color: #1e293b; font-size: 15px; line-height: 1.6; margin: 0;">${record.address}</p>
+                            </td>
+                          </tr>
+                        </table>
+                        ` : ''}
+                        
+                        <!-- Veli Bilgileri -->
+                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0;">
+                          <tr>
+                            <td style="padding-bottom: 15px; border-bottom: 2px solid #3b82f6; margin-bottom: 15px;">
+                              <p style="color: #1e40af; margin: 0; font-size: 16px; font-weight: 700; letter-spacing: 0.3px;">
+                                👨‍👩‍👧‍👦 Veli Bilgileri
+                              </p>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 10px 0; border-bottom: 1px solid #e2e8f0;">
+                              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                  <td style="color: #64748b; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; padding-bottom: 5px;">Ad Soyad</td>
+                                  <td align="right" style="color: #1e293b; font-weight: 700; font-size: 16px;">${record?.parent_name || ''} ${record?.parent_surname || ''}</td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 10px 0; border-bottom: 1px solid #e2e8f0;">
+                              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                  <td style="color: #64748b; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; padding-bottom: 5px;">📧 E-Posta</td>
+                                  <td align="right" style="color: #1e293b; font-weight: 700; font-size: 16px;">${record?.parent_email || 'N/A'}</td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td style="padding: 10px 0;">
+                              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                  <td style="color: #64748b; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; padding-bottom: 5px;">📱 Telefon</td>
+                                  <td align="right" style="color: #1e293b; font-weight: 700; font-size: 16px;">${record?.parent_phone || 'N/A'}</td>
+                                </tr>
+                              </table>
+                            </td>
+                          </tr>
+                        </table>
+                        
+                        <p style="color: #475569; font-size: 16px; line-height: 1.8; margin: 25px 0 0 0;">
+                          Sınav tarihi ve detayları hakkında size en kısa sürede bilgi verilecektir. Sorularınız için bizimle iletişime geçebilirsiniz.
                         </p>
                       </td>
                     </tr>

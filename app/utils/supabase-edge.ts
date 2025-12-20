@@ -329,6 +329,117 @@ export const edgeFunctions = {
     } catch (error) {
       throw error
     }
+  },
+
+  // Simülasyon sınavı başvurusu
+  submitSimulasyonSinaviBasvuru: async (data?: unknown) => {
+    try {
+      const result = await invokeEdgeFunction('submit-simulasyon-sinavi-basvuru', data)
+      
+      if (result && typeof result === 'object') {
+        if (result.success === false) {
+          return result
+        }
+      }
+      
+      return result
+    } catch (error) {
+      if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string' && error.message.includes('429')) {
+        return {
+          success: false,
+          error: 'RATE_LIMIT_EXCEEDED',
+          details: 'Çok fazla istek gönderdiniz. Lütfen birkaç dakika bekleyip tekrar deneyin.',
+          timestamp: new Date().toISOString()
+        }
+      }
+      
+      if (error && typeof error === 'object' && 'responseBody' in error) {
+        const responseBody = (error as any).responseBody
+        if (responseBody && responseBody.error) {
+          return {
+            success: false,
+            error: responseBody.error,
+            details: responseBody.details || responseBody.error,
+            timestamp: responseBody.timestamp || new Date().toISOString()
+          }
+        }
+      }
+      
+      if (error && typeof error === 'object' && 'context' in error) {
+        const context = (error as any).context
+        if (context && context.status === 409) {
+          return {
+            success: false,
+            error: 'Bu TC ile başvuru zaten var',
+            details: 'Bu TC ile başvuru zaten var',
+            timestamp: new Date().toISOString()
+          }
+        }
+      }
+      
+      if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
+        if (error.message.includes('409') || error.message.includes('Conflict')) {
+          return {
+            success: false,
+            error: 'Bu TC ile başvuru zaten var',
+            details: 'Bu TC ile başvuru zaten var',
+            timestamp: new Date().toISOString()
+          }
+        }
+        
+        if (error.message.includes('duplicate') || error.message.includes('already exists') || 
+            error.message.includes('Bu TC ile başvuru zaten var')) {
+          return {
+            success: false,
+            error: 'Bu TC ile başvuru zaten var',
+            details: 'Bu TC ile başvuru zaten var',
+            timestamp: new Date().toISOString()
+          }
+        }
+        
+        if (error.message.includes('non-2xx status code')) {
+          return {
+            success: false,
+            error: 'SERVER_ERROR',
+            details: 'Sunucu hatası. Lütfen tekrar deneyin.',
+            timestamp: new Date().toISOString()
+          }
+        }
+      }
+      
+      throw error
+    }
+  },
+
+  // Simülasyon sınavı tarihlerini getir (aynı zamanda dosya varlığını da kontrol eder)
+  getSimulasyonSinaviDates: async () => {
+    try {
+      const result = await invokeEdgeFunction('get-simulasyon-sinavi-dates')
+      
+      if (result && typeof result === 'object') {
+        if (result.success === false) {
+          // Hata durumunda exists: false döndür
+          return {
+            ...result,
+            exists: false,
+            data: { online: [], yuzYuze: [] },
+            hasNoExamDatesOnline: true,
+            hasNoExamDatesYuzYuze: true
+          }
+        }
+      }
+      
+      return result
+    } catch (error) {
+      return {
+        success: false,
+        exists: false,
+        error: 'Sınav tarihleri alınamadı',
+        data: { online: [], yuzYuze: [] },
+        hasNoExamDatesOnline: true,
+        hasNoExamDatesYuzYuze: true
+      }
+    }
   }
 }
 

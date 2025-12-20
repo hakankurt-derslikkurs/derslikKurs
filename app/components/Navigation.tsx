@@ -2,9 +2,11 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { useSimulasyonSinaviAvailable } from '@/app/hooks/useSimulasyonSinaviAvailable'
 
 export default function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { isAvailable: simulasyonSinaviAvailable } = useSimulasyonSinaviAvailable()
 
   return (
     <nav className="bg-gradient-to-r from-blue-600 via-blue-400 to-blue-200 border-b border-blue-500">
@@ -85,6 +87,11 @@ export default function Navigation() {
                 </div>
               </div>
             </div>
+            {simulasyonSinaviAvailable && (
+              <Link href="/simulasyon-sinavi-basvuru" className="text-white hover:text-blue-200 transition-colors font-medium">
+                2028 Simülasyon Sınavı
+              </Link>
+            )}
             <Link href="/iletisim" className="text-white hover:text-blue-200 transition-colors font-medium">
               İletişim
             </Link>
@@ -168,6 +175,11 @@ export default function Navigation() {
                   </Link>
                 </div>
               </div>
+              {simulasyonSinaviAvailable && (
+                <Link href="/simulasyon-sinavi-basvuru" className="text-white hover:text-blue-200 transition-colors" onClick={() => setIsMenuOpen(false)}>
+                  2028 Simülasyon Sınavı
+                </Link>
+              )}
               <Link href="/iletisim" className="text-white hover:text-blue-200 transition-colors" onClick={() => setIsMenuOpen(false)}>
                 İletişim
               </Link>

@@ -1,0 +1,25 @@
+{
+  "hasNoExamDatesOnline": false,
+  "hasNoExamDatesYuzYuze": false,
+  "online": [
+    {
+      "label": "15 Ocak 2028 - Pazartesi - 10:00",
+      "value": "15 Ocak 2028 - Pazartesi - 10:00"
+    },
+    {
+      "label": "20 Ocak 2028 - Cumartesi - 14:00",
+      "value": "20 Ocak 2028 - Cumartesi - 14:00"
+    }
+  ],
+  "yuzYuze": [
+    {
+      "label": "18 Ocak 2028 - Perşembe - 09:00",
+      "value": "18 Ocak 2028 - Perşembe - 09:00"
+    },
+    {
+      "label": "25 Ocak 2028 - Perşembe - 09:00",
+      "value": "25 Ocak 2028 - Perşembe - 09:00"
+    }
+  ]
+}
+

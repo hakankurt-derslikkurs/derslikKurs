@@ -8,6 +8,7 @@ import { useExamDates } from './hooks/useExamDates'
 import { useMedya } from './hooks/useMedya'
 import { useOgrenciSesleri } from './hooks/useOgrenciSesleri'
 import { useContactForm } from './hooks/useContactForm'
+import { useSimulasyonSinaviAvailable } from './hooks/useSimulasyonSinaviAvailable'
 import { formatPhoneNumber } from './utils/validation'
 import VideoModal from './components/VideoModal'
 import ImageModal from './components/ImageModal'
@@ -28,6 +29,7 @@ export default function Home() {
   
   const { ogrenciSesleri, loading: loadingOgrenciSesleri } = useOgrenciSesleri()
   const { loading: contactLoading, error: contactError, success: contactSuccess, sendContactMail, clearForm, setFormError } = useContactForm()
+  const { isAvailable: simulasyonSinaviAvailable } = useSimulasyonSinaviAvailable()
   
   // En erken sınav tarihini bul
   const nextExamDate = examDates.length > 0 ? examDates[0] : null
@@ -467,6 +469,67 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Simülasyon Sınavı Bilgilendirmesi */}
+      {simulasyonSinaviAvailable && (
+        <section className="py-20 bg-gradient-to-r from-blue-600 via-blue-400 to-blue-200">
+          <div className="container mx-auto px-4">
+            <ScrollAnimation animation="slideUp">
+              <div className="text-center mb-12">
+                <h2 className="text-4xl font-bold text-white mb-4">2028 Simülasyon Sınavı</h2>
+                <p className="text-xl text-blue-100">
+                  9. ve 10. sınıf öğrencilerine özel simülasyon sınavı
+                </p>
+              </div>
+            </ScrollAnimation>
+            
+            <div className="bg-white rounded-2xl shadow-xl p-8 max-w-4xl mx-auto">
+              <div className="grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                  <h3 className="text-2xl font-bold text-blue-800 mb-4">2028 Simülasyon Sınavı Hakkında</h3>
+                  <ul className="space-y-3 text-blue-700">
+                    <li className="flex items-center">
+                      <span className="text-blue-500 mr-2">✓</span>
+                      9. ve 10. sınıf öğrencileri için
+                    </li>
+                    <li className="flex items-center">
+                      <span className="text-blue-500 mr-2">✓</span>
+                      Online veya yüz yüze seçenekleri
+                    </li>
+                    <li className="flex items-center">
+                      <span className="text-blue-500 mr-2">✓</span>
+                      Kendinizi test etme fırsatı
+                    </li>
+                    <li className="flex items-center">
+                      <span className="text-blue-500 mr-2">✓</span>
+                      Ücretsiz katılım
+                    </li>
+                  </ul>
+                  <div className="mt-6">
+                    <a
+                      href="/simulasyon-sinavi-basvuru"
+                      className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors inline-block"
+                    >
+                      Başvuru Yap
+                    </a>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="bg-blue-100 rounded-full w-48 h-48 flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-24 h-24 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <p className="text-blue-800 font-semibold">Simülasyon Sınavı</p>
+                  <p className="text-blue-600 text-lg font-medium">
+                    Online veya Yüz Yüze
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Hizmetlerimiz Section */}
       <section className="py-20 bg-gradient-to-br from-blue-50 to-indigo-100">
